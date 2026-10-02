@@ -1,0 +1,3713 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sistema de Demandas — CT/UFPB</title>
+<style>
+/* ============================================================
+   IDENTIDADE VISUAL INSTITUCIONAL UFPB
+   ============================================================ */
+:root{
+  --ufpb-azul-900:#062a4d;
+  --ufpb-azul-800:#0b3d6b;
+  --ufpb-azul-700:#1565a8;
+  --ufpb-azul-600:#1e78c4;
+  --ufpb-azul-100:#e8f1f9;
+  --ufpb-azul-50:#f5f9fd;
+  --ufpb-verde:#1e7d4a;
+  --ufpb-verde-bg:#e3f5ea;
+  --ufpb-vermelho:#c0392b;
+  --ufpb-vermelho-bg:#fde8e6;
+  --ufpb-ambar:#f0a500;
+  --ufpb-ambar-bg:#fff8e1;
+  --cinza-50:#f8fafc;
+  --cinza-100:#f1f5f9;
+  --cinza-200:#e2e8f0;
+  --cinza-300:#cbd5e1;
+  --cinza-400:#94a3b8;
+  --cinza-500:#64748b;
+  --cinza-700:#334155;
+  --cinza-900:#0f172a;
+  --branco:#ffffff;
+  --sombra-sm:0 1px 2px rgba(15,23,42,.06);
+  --sombra-md:0 4px 12px rgba(15,23,42,.08);
+  --sombra-lg:0 12px 32px rgba(15,23,42,.14);
+  --raio-sm:6px;
+  --raio:10px;
+  --raio-lg:14px;
+  --sidebar-w:250px;
+  --sidebar-w-collapsed:68px;
+  --header-h:64px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  background:var(--cinza-50);color:var(--cinza-900);line-height:1.5;font-size:14.5px;
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit}
+a{color:inherit}
+
+/* ============================================================
+   LOGIN
+   ============================================================ */
+#login-screen{
+  position:fixed;inset:0;z-index:3000;
+  background:
+    radial-gradient(1200px 600px at 15% 20%, rgba(30,120,196,.25), transparent 60%),
+    radial-gradient(900px 500px at 85% 80%, rgba(30,125,74,.18), transparent 60%),
+    linear-gradient(135deg,var(--ufpb-azul-800),var(--ufpb-azul-900));
+  display:grid;place-items:center;padding:20px;
+}
+.login-card{
+  background:#fff;border-radius:var(--raio-lg);padding:36px 30px;
+  max-width:430px;width:100%;box-shadow:var(--sombra-lg);
+  border:1px solid rgba(255,255,255,.4);
+  animation:fade .4s ease;
+}
+.login-card .logo-login{
+  width:82px;height:82px;display:block;margin:0 auto 16px;
+  border-radius:12px;object-fit:contain;
+  background:var(--ufpb-azul-50);padding:6px;
+}
+.login-card h1{font-size:19px;color:var(--ufpb-azul-900);text-align:center;margin-bottom:4px;letter-spacing:-.2px}
+.login-card .sub{font-size:13px;color:var(--cinza-500);text-align:center;margin-bottom:24px}
+.login-card .field{margin-bottom:14px}
+.login-card .field label{display:block;font-size:12.5px;font-weight:600;color:var(--ufpb-azul-900);margin-bottom:5px}
+.login-card .field input{
+  width:100%;padding:11px 12px;border:1px solid var(--cinza-200);border-radius:var(--raio-sm);
+  font-size:14px;font-family:inherit;transition:.18s;background:var(--cinza-50);
+}
+.login-card .field input:focus{
+  outline:none;border-color:var(--ufpb-azul-700);background:#fff;
+  box-shadow:0 0 0 3px rgba(21,101,168,.12);
+}
+.login-card .btn-login{
+  width:100%;padding:12px;background:var(--ufpb-azul-800);color:#fff;border:none;
+  border-radius:var(--raio-sm);font-size:14.5px;font-weight:600;cursor:pointer;
+  transition:.18s;margin-top:6px;letter-spacing:.2px;
+}
+.login-card .btn-login:hover{background:var(--ufpb-azul-700)}
+.login-card .erro-login{
+  background:var(--ufpb-vermelho-bg);color:var(--ufpb-vermelho);
+  border-left:3px solid var(--ufpb-vermelho);padding:10px 12px;
+  border-radius:var(--raio-sm);font-size:13px;margin-bottom:12px;display:none;
+}
+.login-card .rodape-login{
+  margin-top:20px;text-align:center;font-size:11px;color:var(--cinza-400);
+}
+
+/* ============================================================
+   LAYOUT PRINCIPAL: SIDEBAR + HEADER + MAIN
+   ============================================================ */
+#app-shell{display:none}
+#app-shell.visible{display:block}
+
+/* Sidebar */
+.sidebar{
+  position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);
+  background:var(--ufpb-azul-900);
+  color:#fff;z-index:200;transition:width .22s ease, transform .22s ease;
+  display:flex;flex-direction:column;
+  box-shadow:1px 0 0 rgba(255,255,255,.05);
+}
+.sidebar.collapsed{width:var(--sidebar-w-collapsed)}
+.sidebar-brand{
+  display:flex;align-items:center;gap:10px;padding:14px 16px;
+  height:var(--header-h);border-bottom:1px solid rgba(255,255,255,.08);
+  flex-shrink:0;
+}
+.sidebar-brand .brand-logo{
+  width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,.12);
+  display:grid;place-items:center;overflow:hidden;flex-shrink:0;
+}
+.sidebar-brand .brand-logo img{width:100%;height:100%;object-fit:contain;padding:3px}
+.sidebar-brand .brand-text{min-width:0;overflow:hidden}
+.sidebar-brand .brand-text h1{font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sidebar-brand .brand-text p{font-size:11px;opacity:.65;white-space:nowrap}
+.sidebar.collapsed .brand-text{display:none}
+
+.sidebar-nav{flex:1;padding:12px 10px;overflow-y:auto}
+.sidebar-nav .nav-section{
+  font-size:10px;text-transform:uppercase;letter-spacing:.8px;
+  color:rgba(255,255,255,.4);font-weight:600;padding:14px 12px 6px;
+}
+.sidebar.collapsed .nav-section{display:none}
+.sidebar-nav button{
+  display:flex;align-items:center;gap:12px;width:100%;
+  background:transparent;border:none;color:rgba(255,255,255,.82);
+  padding:10px 12px;border-radius:var(--raio-sm);cursor:pointer;
+  font-size:13.5px;font-weight:500;text-align:left;transition:.15s;margin-bottom:2px;
+}
+.sidebar-nav button .ico{
+  font-size:16px;width:20px;text-align:center;flex-shrink:0;
+  display:inline-block;
+}
+.sidebar-nav button .lbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sidebar-nav button:hover{background:rgba(255,255,255,.08);color:#fff}
+.sidebar-nav button.active{background:var(--ufpb-azul-700);color:#fff;font-weight:600}
+.sidebar.collapsed .sidebar-nav button .lbl{display:none}
+.sidebar.collapsed .sidebar-nav button{justify-content:center;padding:12px}
+
+.sidebar-footer{
+  padding:12px;border-top:1px solid rgba(255,255,255,.08);
+  display:flex;align-items:center;gap:10px;
+}
+.sidebar-footer .user-info{min-width:0;flex:1;overflow:hidden}
+.sidebar-footer .user-info .nome{font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sidebar-footer .user-info .papel{font-size:10.5px;opacity:.6}
+.sidebar-footer .btn-icon{
+  background:rgba(255,255,255,.1);border:none;color:#fff;
+  width:34px;height:34px;border-radius:var(--raio-sm);cursor:pointer;
+  display:grid;place-items:center;font-size:14px;transition:.15s;
+}
+.sidebar-footer .btn-icon:hover{background:var(--ufpb-vermelho)}
+.sidebar.collapsed .sidebar-footer .user-info{display:none}
+.sidebar.collapsed .sidebar-footer{justify-content:center}
+
+/* Main wrapper */
+.main-wrap{
+  margin-left:var(--sidebar-w);transition:margin-left .22s ease;
+  min-height:100vh;display:flex;flex-direction:column;
+}
+body.sidebar-collapsed .main-wrap{margin-left:var(--sidebar-w-collapsed)}
+
+/* Header */
+header.topbar{
+  background:#fff;color:var(--cinza-900);
+  padding:0 20px;height:var(--header-h);
+  position:sticky;top:0;z-index:100;
+  border-bottom:1px solid var(--cinza-200);
+  display:flex;align-items:center;gap:14px;
+}
+.topbar .btn-toggle{
+  background:transparent;border:none;color:var(--cinza-500);cursor:pointer;
+  width:34px;height:34px;border-radius:var(--raio-sm);
+  display:grid;place-items:center;font-size:16px;transition:.15s;
+}
+.topbar .btn-toggle:hover{background:var(--cinza-100);color:var(--ufpb-azul-800)}
+.topbar .crumb{display:flex;flex-direction:column;min-width:0}
+.topbar .crumb h2{
+  font-size:15px;color:var(--ufpb-azul-900);font-weight:600;
+  line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.topbar .crumb p{font-size:11.5px;color:var(--cinza-500)}
+.topbar .topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.topbar .badge-sistema{
+  background:var(--ufpb-azul-100);color:var(--ufpb-azul-800);
+  font-size:11px;font-weight:600;padding:5px 10px;border-radius:20px;
+  display:inline-flex;align-items:center;gap:6px;
+}
+.topbar .badge-sistema .dot{
+  width:7px;height:7px;border-radius:50%;background:var(--ufpb-verde);
+  box-shadow:0 0 0 3px rgba(30,125,74,.18);
+}
+.topbar .badge-sistema.off .dot{background:var(--ufpb-ambar);box-shadow:0 0 0 3px rgba(240,165,0,.18)}
+
+/* Main content */
+main{
+  flex:1;padding:24px 26px 60px;max-width:1600px;width:100%;
+  margin:0 auto;
+}
+.view{display:none;animation:fade .28s ease}
+.view.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ============================================================
+   COMPONENTES GERAIS
+   ============================================================ */
+.card{
+  background:#fff;border:1px solid var(--cinza-200);border-radius:var(--raio);
+  padding:20px;margin-bottom:18px;box-shadow:var(--sombra-sm);
+}
+.card.flush{padding:0;overflow:hidden}
+.card h2{
+  font-size:15.5px;color:var(--ufpb-azul-900);margin-bottom:4px;
+  display:flex;align-items:center;gap:9px;font-weight:600;letter-spacing:-.1px;
+}
+.card h2 .ico{
+  font-size:16px;width:30px;height:30px;border-radius:8px;
+  background:var(--ufpb-azul-100);color:var(--ufpb-azul-800);
+  display:grid;place-items:center;flex-shrink:0;
+}
+.card .sub{font-size:13px;color:var(--cinza-500);margin-bottom:16px}
+.card-header{
+  padding:16px 20px;border-bottom:1px solid var(--cinza-200);
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+}
+.card-header h2{margin:0}
+.card-body{padding:20px}
+
+/* Botões */
+.btn{
+  padding:9px 16px;border-radius:var(--raio-sm);border:1px solid transparent;
+  font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit;
+  transition:.16s;display:inline-flex;align-items:center;gap:7px;
+  white-space:nowrap;
+}
+.btn-primary{background:var(--ufpb-azul-800);color:#fff}
+.btn-primary:hover:not(:disabled){background:var(--ufpb-azul-700)}
+.btn-success{background:var(--ufpb-verde);color:#fff}
+.btn-success:hover:not(:disabled){background:#166139}
+.btn-outline{background:#fff;border-color:var(--cinza-200);color:var(--ufpb-azul-800)}
+.btn-outline:hover:not(:disabled){background:var(--ufpb-azul-50);border-color:var(--ufpb-azul-100)}
+.btn-danger{background:#fff;border-color:#f0c4c0;color:var(--ufpb-vermelho)}
+.btn-danger:hover{background:var(--ufpb-vermelho-bg)}
+.btn-ghost{background:transparent;border-color:transparent;color:var(--cinza-500);padding:6px 10px}
+.btn-ghost:hover{background:var(--cinza-100);color:var(--ufpb-azul-800)}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.btn-sm{padding:6px 10px;font-size:12px}
+.btn-xs{padding:4px 8px;font-size:11px;border-radius:4px}
+
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;justify-content:flex-end}
+
+/* Grids */
+.grid{display:grid;gap:14px}
+.grid.two{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.grid.three{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+
+/* KPI */
+.kpi-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:14px;margin-bottom:18px;
+}
+.kpi{
+  background:#fff;border:1px solid var(--cinza-200);border-radius:var(--raio);
+  padding:16px 18px;box-shadow:var(--sombra-sm);position:relative;overflow:hidden;
+}
+.kpi .kpi-label{
+  font-size:11px;color:var(--cinza-500);text-transform:uppercase;
+  letter-spacing:.5px;font-weight:600;
+}
+.kpi .kpi-value{
+  font-size:26px;font-weight:700;color:var(--ufpb-azul-900);
+  margin-top:6px;line-height:1.1;letter-spacing:-.5px;
+}
+.kpi .kpi-sub{font-size:11.5px;color:var(--cinza-500);margin-top:5px}
+.kpi .kpi-trend{
+  font-size:11.5px;margin-top:6px;font-weight:600;
+  display:inline-flex;align-items:center;gap:4px;
+}
+.kpi .kpi-trend.up{color:var(--ufpb-verde)}
+.kpi .kpi-trend.down{color:var(--ufpb-vermelho)}
+.kpi.accent-azul{border-left:3px solid var(--ufpb-azul-700)}
+.kpi.accent-verde{border-left:3px solid var(--ufpb-verde)}
+.kpi.accent-ambar{border-left:3px solid var(--ufpb-ambar)}
+.kpi.accent-vermelho{border-left:3px solid var(--ufpb-vermelho)}
+.kpi .kpi-spark{position:absolute;right:12px;top:12px;opacity:.7}
+
+/* Form fields */
+.field label{
+  display:block;font-size:12.5px;font-weight:600;
+  color:var(--ufpb-azul-900);margin-bottom:5px;
+}
+.field label .req{color:var(--ufpb-vermelho)}
+.field input,.field select,.field textarea{
+  width:100%;padding:10px 12px;border:1px solid var(--cinza-200);
+  border-radius:var(--raio-sm);font-size:14px;font-family:inherit;
+  background:#fff;transition:.16s;color:var(--cinza-900);
+}
+.field input:focus,.field select:focus,.field textarea:focus{
+  outline:none;border-color:var(--ufpb-azul-700);
+  box-shadow:0 0 0 3px rgba(21,101,168,.12);
+}
+.field input:disabled,.field select:disabled{
+  background:var(--cinza-100);color:var(--cinza-400);cursor:not-allowed;
+}
+.field textarea{resize:vertical;min-height:70px}
+.field .hint{font-size:11px;color:var(--cinza-400);margin-top:4px}
+.field.error input,.field.error select{border-color:var(--ufpb-vermelho);background:var(--ufpb-vermelho-bg)}
+
+/* Filtros */
+.filters-bar{
+  background:#fff;border:1px solid var(--cinza-200);border-radius:var(--raio);
+  padding:14px 16px;margin-bottom:18px;box-shadow:var(--sombra-sm);
+}
+.filters-bar .filters-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:12px;gap:10px;flex-wrap:wrap;
+}
+.filters-bar .filters-title{
+  font-size:13px;font-weight:600;color:var(--ufpb-azul-900);
+  display:flex;align-items:center;gap:8px;
+}
+.filters-bar .filters-title .ico{font-size:14px}
+.filters-bar .filters-count{
+  font-size:11px;background:var(--ufpb-azul-100);color:var(--ufpb-azul-800);
+  padding:2px 8px;border-radius:20px;font-weight:600;
+}
+.filtros{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));
+  gap:10px;
+}
+.filtros select,.filtros input{
+  padding:9px 11px;border:1px solid var(--cinza-200);border-radius:var(--raio-sm);
+  font-size:13px;font-family:inherit;background:#fff;width:100%;transition:.16s;
+}
+.filtros select:focus,.filtros input:focus{
+  outline:none;border-color:var(--ufpb-azul-700);
+  box-shadow:0 0 0 3px rgba(21,101,168,.12);
+}
+.filtros .filter-group{position:relative}
+.filtros .filter-group label{
+  display:block;font-size:10.5px;color:var(--cinza-500);
+  font-weight:600;text-transform:uppercase;letter-spacing:.4px;
+  margin-bottom:4px;
+}
+
+/* Tabelas */
+.table-wrap{
+  overflow-x:auto;border:1px solid var(--cinza-200);
+  border-radius:var(--raio);background:#fff;
+}
+table{
+  width:100%;border-collapse:collapse;font-size:13px;background:#fff;
+}
+th{
+  background:var(--cinza-50);color:var(--ufpb-azul-900);text-align:left;
+  padding:11px 14px;font-weight:600;font-size:11.5px;white-space:nowrap;
+  border-bottom:1px solid var(--cinza-200);letter-spacing:.3px;
+  text-transform:uppercase;
+}
+th.sortable{cursor:pointer;user-select:none}
+th.sortable:hover{background:var(--cinza-100)}
+th .sort-ind{font-size:9px;opacity:.5;margin-left:4px}
+th.sorted .sort-ind{opacity:1;color:var(--ufpb-azul-700)}
+td{padding:10px 14px;border-bottom:1px solid var(--cinza-100);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:var(--ufpb-azul-50)}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+td.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--cinza-500)}
+td.trunc{max-width:420px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+tfoot td{background:var(--ufpb-azul-50);font-weight:700;color:var(--ufpb-azul-900)}
+
+/* Badges */
+.badge{
+  display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;
+  font-weight:600;background:var(--ufpb-azul-100);color:var(--ufpb-azul-800);
+  white-space:nowrap;
+}
+.badge.verde{background:var(--ufpb-verde-bg);color:var(--ufpb-verde)}
+.badge.vermelho{background:var(--ufpb-vermelho-bg);color:var(--ufpb-vermelho)}
+.badge.ambar{background:var(--ufpb-ambar-bg);color:#7a5200}
+.badge.cinza{background:var(--cinza-100);color:var(--cinza-700)}
+
+/* Empty state */
+.empty{
+  text-align:center;padding:40px 20px;color:var(--cinza-500);font-size:13.5px;
+}
+.empty .ico{font-size:42px;opacity:.35;margin-bottom:10px;display:block}
+.empty h3{font-size:15px;color:var(--cinza-700);margin-bottom:4px;font-weight:600}
+.empty p{font-size:13px;color:var(--cinza-500)}
+
+/* Loading / Skeleton */
+.loading{text-align:center;padding:50px;color:var(--cinza-500)}
+.spinner{
+  width:32px;height:32px;border:3px solid var(--cinza-200);
+  border-top-color:var(--ufpb-azul-700);border-radius:50%;
+  animation:spin .8s linear infinite;margin:0 auto 12px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.skeleton{
+  background:linear-gradient(90deg,var(--cinza-100) 25%,var(--cinza-200) 50%,var(--cinza-100) 75%);
+  background-size:200% 100%;animation:skel 1.4s ease infinite;border-radius:6px;
+}
+@keyframes skel{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* Stepper (demanda) */
+.stepper{
+  display:flex;gap:6px;margin-bottom:22px;overflow-x:auto;padding-bottom:4px;
+}
+.step{
+  flex:1;min-width:130px;background:#fff;border:1px solid var(--cinza-200);
+  border-radius:var(--raio-sm);padding:10px 12px;font-size:12px;
+  color:var(--cinza-500);display:flex;align-items:center;gap:8px;transition:.16s;
+}
+.step .num{
+  width:24px;height:24px;border-radius:50%;background:var(--cinza-100);
+  color:var(--cinza-500);display:grid;place-items:center;font-weight:700;
+  font-size:12px;flex-shrink:0;
+}
+.step.active{border-color:var(--ufpb-azul-700);background:var(--ufpb-azul-50);color:var(--ufpb-azul-800);font-weight:600}
+.step.active .num{background:var(--ufpb-azul-800);color:#fff}
+.step.done .num{background:var(--ufpb-verde);color:#fff}
+.step.done{border-color:var(--ufpb-verde-bg)}
+
+/* Banner semestre */
+.banner-semestre{
+  background:linear-gradient(135deg,#fffdf5,#fff8e1);
+  border-left:4px solid var(--ufpb-ambar);border-radius:var(--raio);
+  padding:14px 18px;margin-bottom:18px;
+}
+.banner-semestre h3{color:#7a5200;font-size:14.5px;margin-bottom:4px;font-weight:600}
+.banner-semestre p{color:#8a6500;font-size:12.5px}
+
+/* Material rows */
+.material-row{
+  display:grid;grid-template-columns:1fr auto;gap:12px;
+  padding:12px;border:1px solid var(--cinza-200);border-radius:var(--raio-sm);
+  background:#fff;margin-bottom:8px;align-items:center;transition:.15s;
+}
+.material-row:hover{border-color:var(--ufpb-azul-100);box-shadow:var(--sombra-sm)}
+.material-info{min-width:0}
+.material-info .nome{
+  font-size:13px;font-weight:600;color:var(--cinza-900);margin-bottom:3px;
+  overflow:hidden;text-overflow:ellipsis;display:-webkit-box;
+  -webkit-line-clamp:2;-webkit-box-orient:vertical;
+}
+.material-info .meta{font-size:11.5px;color:var(--cinza-500)}
+.material-info .meta b{color:var(--ufpb-azul-800)}
+.material-add{display:flex;gap:6px;align-items:center;flex-shrink:0}
+.material-add input{
+  width:70px;padding:8px;border:1px solid var(--cinza-200);
+  border-radius:var(--raio-sm);text-align:center;font-size:14px;font-family:inherit;
+}
+.material-add input:focus{outline:none;border-color:var(--ufpb-azul-700)}
+
+/* Cart */
+.cart-item{
+  display:grid;grid-template-columns:1fr 90px auto;gap:10px;align-items:center;
+  padding:10px 12px;border-bottom:1px solid var(--cinza-100);
+}
+.cart-item:last-child{border-bottom:none}
+.cart-item .ci-nome{font-size:13px;font-weight:500}
+.cart-item .ci-meta{font-size:11px;color:var(--cinza-500)}
+.cart-item input{
+  width:100%;padding:7px;border:1px solid var(--cinza-200);border-radius:var(--raio-sm);
+  text-align:center;font-size:14px;font-family:inherit;
+}
+.cart-item input:focus{outline:none;border-color:var(--ufpb-azul-700)}
+.cart-item .btn-remove{
+  background:none;border:none;color:var(--ufpb-vermelho);cursor:pointer;
+  font-size:16px;padding:4px 8px;border-radius:var(--raio-sm);transition:.15s;
+}
+.cart-item .btn-remove:hover{background:var(--ufpb-vermelho-bg)}
+.cart-total{
+  display:flex;justify-content:space-between;padding:12px 14px;
+  background:var(--ufpb-azul-50);border-radius:var(--raio-sm);margin-top:12px;
+  font-weight:600;color:var(--ufpb-azul-900);font-size:13px;
+}
+
+/* Revisão */
+.revisao-bloco{margin-bottom:18px}
+.revisao-bloco h3{
+  font-size:12px;color:var(--ufpb-azul-700);text-transform:uppercase;
+  letter-spacing:.5px;margin-bottom:10px;padding-bottom:5px;
+  border-bottom:1px solid var(--cinza-200);font-weight:700;
+}
+.revisao-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.revisao-item{font-size:13px}
+.revisao-item .k{color:var(--cinza-500);font-size:10.5px;text-transform:uppercase;letter-spacing:.3px;font-weight:600}
+.revisao-item .v{color:var(--cinza-900);font-weight:500;margin-top:2px}
+
+/* Sucesso */
+.sucesso-box{text-align:center;padding:30px 20px}
+.sucesso-box .check{
+  width:72px;height:72px;border-radius:50%;background:var(--ufpb-verde-bg);
+  color:var(--ufpb-verde);display:grid;place-items:center;font-size:36px;
+  margin:0 auto 16px;
+}
+.sucesso-box h2{color:var(--ufpb-verde);font-size:22px;margin-bottom:8px;justify-content:center}
+.sucesso-box .id-demanda{
+  font-family:ui-monospace,monospace;font-size:20px;font-weight:700;
+  color:var(--ufpb-azul-800);background:var(--ufpb-azul-50);
+  padding:10px 20px;border-radius:var(--raio-sm);display:inline-block;
+  margin:12px 0;letter-spacing:1px;border:1px solid var(--ufpb-azul-100);
+}
+
+/* Alerts */
+.alert{
+  padding:12px 14px;border-radius:var(--raio-sm);font-size:13px;
+  margin-bottom:14px;display:flex;gap:10px;align-items:flex-start;
+}
+.alert-info{background:var(--ufpb-azul-50);color:var(--ufpb-azul-800);border-left:3px solid var(--ufpb-azul-700)}
+.alert-warn{background:var(--ufpb-ambar-bg);color:#7a5200;border-left:3px solid var(--ufpb-ambar)}
+.alert-erro{background:var(--ufpb-vermelho-bg);color:var(--ufpb-vermelho);border-left:3px solid var(--ufpb-vermelho)}
+.alert-ok{background:var(--ufpb-verde-bg);color:var(--ufpb-verde);border-left:3px solid var(--ufpb-verde)}
+
+/* Toast */
+.toast{
+  position:fixed;top:20px;right:20px;
+  background:var(--ufpb-azul-900);color:#fff;padding:12px 18px;
+  border-radius:var(--raio-sm);font-size:13px;font-weight:500;
+  box-shadow:var(--sombra-lg);z-index:4000;opacity:0;
+  transform:translateX(120%);transition:.3s;pointer-events:none;
+  max-width:min(90vw,400px);border-left:3px solid var(--ufpb-azul-700);
+}
+.toast.show{transform:translateX(0);opacity:1}
+.toast.erro{background:var(--ufpb-vermelho);border-left-color:#8a2b1e}
+.toast.ok{background:var(--ufpb-verde);border-left-color:#166139}
+
+/* Pagination */
+.pagination{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:10px;padding:12px 16px;border-top:1px solid var(--cinza-200);
+  background:var(--cinza-50);flex-wrap:wrap;
+}
+.pagination .pg-info{font-size:12.5px;color:var(--cinza-500)}
+.pagination .pg-controls{display:flex;gap:5px;align-items:center}
+.pagination button{
+  min-width:32px;height:32px;padding:0 10px;border:1px solid var(--cinza-200);
+  background:#fff;border-radius:var(--raio-sm);cursor:pointer;
+  font-size:13px;font-weight:500;color:var(--cinza-700);transition:.15s;
+}
+.pagination button:hover:not(:disabled){background:var(--ufpb-azul-50);border-color:var(--ufpb-azul-100);color:var(--ufpb-azul-800)}
+.pagination button.active{background:var(--ufpb-azul-800);border-color:var(--ufpb-azul-800);color:#fff}
+.pagination button:disabled{opacity:.4;cursor:not-allowed}
+
+/* Charts */
+.chart-container{position:relative;width:100%}
+.chart-legend{
+  display:flex;flex-wrap:wrap;gap:10px 16px;margin-top:12px;
+  font-size:12px;color:var(--cinza-700);
+}
+.chart-legend .lg-item{display:flex;align-items:center;gap:6px}
+.chart-legend .lg-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.chart-legend .lg-val{color:var(--cinza-500);font-weight:600}
+
+/* Detail grid */
+.detail-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:12px;margin-bottom:16px;
+}
+.detail-item{
+  background:var(--cinza-50);border-radius:var(--raio-sm);padding:12px 14px;
+  border:1px solid var(--cinza-100);
+}
+.detail-item .k{
+  font-size:10.5px;color:var(--cinza-500);text-transform:uppercase;
+  letter-spacing:.4px;font-weight:600;margin-bottom:3px;
+}
+.detail-item .v{font-size:13.5px;color:var(--cinza-900);font-weight:500;word-break:break-word}
+
+/* Modal */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(15,23,42,.55);
+  z-index:2500;display:none;align-items:center;justify-content:center;
+  padding:20px;animation:fade .2s ease;
+}
+.modal-overlay.show{display:flex}
+.modal{
+  background:#fff;border-radius:var(--raio-lg);max-width:900px;width:100%;
+  max-height:90vh;display:flex;flex-direction:column;
+  box-shadow:var(--sombra-lg);animation:slideUp .25s ease;
+}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+.modal-header{
+  padding:16px 20px;border-bottom:1px solid var(--cinza-200);
+  display:flex;align-items:center;gap:12px;
+}
+.modal-header h2{font-size:16px;color:var(--ufpb-azul-900);margin:0;flex:1;font-weight:600}
+.modal-header .btn-close{
+  background:transparent;border:none;font-size:20px;color:var(--cinza-500);
+  cursor:pointer;width:32px;height:32px;border-radius:var(--raio-sm);
+  display:grid;place-items:center;transition:.15s;
+}
+.modal-header .btn-close:hover{background:var(--cinza-100);color:var(--ufpb-vermelho)}
+.modal-body{padding:20px;overflow-y:auto;flex:1}
+.modal-footer{
+  padding:14px 20px;border-top:1px solid var(--cinza-200);
+  display:flex;gap:10px;justify-content:flex-end;
+}
+
+/* Tabs */
+.tabs{
+  display:flex;gap:2px;border-bottom:1px solid var(--cinza-200);margin-bottom:20px;
+  overflow-x:auto;
+}
+.tabs button{
+  padding:11px 16px;background:transparent;border:none;border-bottom:2px solid transparent;
+  font-size:13.5px;font-weight:500;color:var(--cinza-500);cursor:pointer;
+  transition:.16s;font-family:inherit;white-space:nowrap;
+  display:inline-flex;align-items:center;gap:7px;
+}
+.tabs button:hover{color:var(--ufpb-azul-800)}
+.tabs button.active{color:var(--ufpb-azul-800);border-bottom-color:var(--ufpb-azul-800);font-weight:600}
+
+/* Report items */
+.report-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;
+}
+.report-card{
+  background:#fff;border:1px solid var(--cinza-200);border-radius:var(--raio);
+  padding:18px;transition:.18s;display:flex;flex-direction:column;
+}
+.report-card:hover{border-color:var(--ufpb-azul-100);box-shadow:var(--sombra-md);transform:translateY(-2px)}
+.report-card .rc-icon{
+  width:44px;height:44px;border-radius:10px;background:var(--ufpb-azul-50);
+  color:var(--ufpb-azul-800);display:grid;place-items:center;font-size:20px;
+  margin-bottom:12px;
+}
+.report-card h3{font-size:14.5px;color:var(--ufpb-azul-900);margin-bottom:5px;font-weight:600}
+.report-card p{font-size:12.5px;color:var(--cinza-500);margin-bottom:14px;flex:1}
+.report-card .rc-actions{display:flex;gap:6px;flex-wrap:wrap}
+
+/* Admin badge */
+.admin-badge{
+  background:var(--ufpb-ambar-bg);color:#7a5200;padding:2px 8px;
+  border-radius:4px;font-size:10px;font-weight:700;margin-left:6px;
+}
+
+/* Impressão */
+@media print{
+  .sidebar,header.topbar,.actions,.no-print,.filters-bar,
+  .pagination,.btn,.tabs,.toast,.modal-overlay{display:none!important}
+  body{background:#fff}
+  .card{border:none;box-shadow:none;padding:0;margin-bottom:14px}
+  main{padding:0;max-width:100%}
+  .view{display:none!important}
+  .view.print-target{display:block!important}
+  table{font-size:11px}
+  th{background:#f0f0f0!important;color:#000!important}
+  .kpi{border:1px solid #ccc}
+}
+
+/* ============================================================
+   RESPONSIVO
+   ============================================================ */
+@media(max-width:1024px){
+  main{padding:20px 18px 60px}
+  .kpi-grid{grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+}
+@media(max-width:768px){
+  :root{--header-h:56px}
+  .sidebar{
+    transform:translateX(-100%);
+    width:var(--sidebar-w);
+  }
+  .sidebar.mobile-open{transform:translateX(0)}
+  .sidebar.collapsed{width:var(--sidebar-w)} /* no mobile, sempre expandida */
+  .sidebar.collapsed .brand-text{display:block}
+  .sidebar.collapsed .sidebar-nav .nav-section{display:block}
+  .sidebar.collapsed .sidebar-nav button .lbl{display:inline}
+  .sidebar.collapsed .sidebar-nav button{justify-content:flex-start;padding:10px 12px}
+  .sidebar.collapsed .sidebar-footer .user-info{display:block}
+  .sidebar.collapsed .sidebar-footer{justify-content:flex-start}
+
+  .main-wrap{margin-left:0!important}
+  .topbar{padding:0 14px}
+  .topbar .crumb h2{font-size:14px}
+  .topbar .badge-sistema{display:none}
+  main{padding:16px 12px 60px}
+  .card{padding:16px}
+  .material-row{grid-template-columns:1fr}
+  .material-add{justify-content:flex-end}
+  .cart-item{grid-template-columns:1fr 70px auto;gap:6px;padding:8px}
+  .actions{flex-direction:column-reverse}
+  .actions .btn{width:100%;justify-content:center}
+  .kpi .kpi-value{font-size:22px}
+  .step{min-width:110px;font-size:11px;padding:8px}
+  .filtros{grid-template-columns:1fr 1fr}
+  .topbar .btn-toggle{display:grid!important}
+}
+@media(min-width:769px){
+  .topbar .btn-toggle.mobile-only{display:none}
+  .sidebar-overlay{display:none!important}
+}
+.sidebar-overlay{
+  position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:150;
+  display:none;
+}
+.sidebar-overlay.show{display:block}
+
+/* Chart tooltip */
+.chart-tip{
+  position:absolute;background:var(--ufpb-azul-900);color:#fff;
+  padding:6px 10px;border-radius:6px;font-size:12px;pointer-events:none;
+  opacity:0;transition:opacity .15s;white-space:nowrap;z-index:10;
+  box-shadow:var(--sombra-md);
+}
+.chart-tip.show{opacity:1}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     LOGIN (INALTERADO)
+     ============================================================ -->
+<div id="login-screen">
+  <div class="login-card">
+    <img src="https://res.cloudinary.com/dqmuoc3o0/image/upload/v1790945934/ct-logo_oa0oyk.png" alt="Logo CT/UFPB" class="logo-login" />
+    <h1>Levantamento Semestral de Demanda</h1>
+    <p class="sub">Centro de Tecnologia — UFPB</p>
+    <div class="erro-login" id="login-erro">Usuário ou senha inválidos.</div>
+    <div class="field">
+      <label for="login-user">Usuário</label>
+      <input type="text" id="login-user" placeholder="Digite seu usuário" autocomplete="username" />
+    </div>
+    <div class="field">
+      <label for="login-pass">Senha</label>
+      <input type="password" id="login-pass" placeholder="Digite sua senha" autocomplete="current-password" />
+    </div>
+    <button class="btn-login" id="btn-login">Entrar</button>
+    <div class="rodape-login">Sistema de Gestão de Demandas — CT/UFPB</div>
+  </div>
+</div>
+
+<!-- ============================================================
+     APP SHELL (SIDEBAR + HEADER + MAIN)
+     ============================================================ -->
+<div id="app-shell">
+
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-logo">
+        <img src="https://res.cloudinary.com/dqmuoc3o0/image/upload/v1790945934/ct-logo_oa0oyk.png" alt="CT" />
+      </div>
+      <div class="brand-text">
+        <h1>Demandas CT</h1>
+        <p>Centro de Tecnologia · UFPB</p>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section">Principal</div>
+      <button data-view="dashboard" class="active">
+        <span class="ico">📊</span><span class="lbl">Dashboard</span>
+      </button>
+      <button data-view="demanda">
+        <span class="ico">📝</span><span class="lbl">Nova Demanda</span>
+      </button>
+      <button data-view="pedidos">
+        <span class="ico">📦</span><span class="lbl">Pedidos</span>
+      </button>
+
+      <div class="nav-section">Análises</div>
+      <button data-view="departamentos">
+        <span class="ico">🏛️</span><span class="lbl">Departamentos</span>
+      </button>
+      <button data-view="setores">
+        <span class="ico">🏢</span><span class="lbl">Setores</span>
+      </button>
+      <button data-view="consolidacao">
+        <span class="ico">📈</span><span class="lbl">Consolidação</span>
+      </button>
+
+      <div class="nav-section">Gestão</div>
+      <button data-view="relatorios">
+        <span class="ico">📄</span><span class="lbl">Relatórios</span>
+      </button>
+      <button data-view="admin">
+        <span class="ico">⚙️</span><span class="lbl">Painel Admin</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="nome">Servidor CT</div>
+        <div class="papel">Administrador</div>
+      </div>
+      <button class="btn-icon" onclick="App.logout()" title="Sair">⏻</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-wrap">
+    <header class="topbar">
+      <button class="btn-toggle mobile-only" id="btn-sidebar-toggle" title="Menu">☰</button>
+      <button class="btn-toggle" id="btn-collapse" title="Recolher menu" style="display:none">≡</button>
+      <div class="crumb">
+        <h2 id="crumb-title">Dashboard</h2>
+        <p id="crumb-sub">Visão geral das demandas</p>
+      </div>
+      <div class="topbar-right">
+        <span class="badge-sistema" id="badge-api">
+          <span class="dot"></span> <span id="badge-api-text">Conectando...</span>
+        </span>
+      </div>
+    </header>
+
+    <main>
+
+      <!-- ======================================================
+           VIEW: DASHBOARD
+           ====================================================== -->
+      <section id="view-dashboard" class="view active">
+        <div id="dash-kpis" class="kpi-grid"></div>
+
+        <div class="grid two" style="margin-bottom:18px">
+          <div class="card flush">
+            <div class="card-header">
+              <h2><span class="ico">📈</span> Evolução das Demandas</h2>
+            </div>
+            <div class="card-body">
+              <div class="chart-container" id="chart-evolucao"></div>
+            </div>
+          </div>
+          <div class="card flush">
+            <div class="card-header">
+              <h2><span class="ico">🏛️</span> Demanda por Departamento</h2>
+            </div>
+            <div class="card-body">
+              <div class="chart-container" id="chart-departamentos"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid two" style="margin-bottom:18px">
+          <div class="card flush">
+            <div class="card-header">
+              <h2><span class="ico">🔥</span> Top 10 Materiais Mais Solicitados</h2>
+            </div>
+            <div class="card-body">
+              <div class="chart-container" id="chart-top-materiais"></div>
+            </div>
+          </div>
+          <div class="card flush">
+            <div class="card-header">
+              <h2><span class="ico">🏢</span> Top Setores Demandantes</h2>
+            </div>
+            <div class="card-body">
+              <div class="chart-container" id="chart-top-setores"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card flush">
+          <div class="card-header">
+            <h2><span class="ico">📋</span> Últimos Pedidos Recebidos</h2>
+            <button class="btn btn-outline btn-sm" onclick="App.go('pedidos')" style="margin-left:auto">Ver todos →</button>
+          </div>
+          <div class="table-wrap" style="border:none;border-radius:0">
+            <table id="dash-ultimos">
+              <thead><tr>
+                <th>ID</th><th>Data/Hora</th><th>Semestre</th>
+                <th>Departamento</th><th>Setor</th>
+                <th class="num">Itens</th><th class="num">Qtd</th><th>Status</th>
+              </tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================
+           VIEW: NOVA DEMANDA (INALTERADA)
+           ====================================================== -->
+      <section id="view-demanda" class="view">
+
+        <div class="banner-semestre">
+          <h3>📅 DEMANDA SEMESTRAL DE MATERIAIS</h3>
+          <p><b>Atenção:</b> esta é uma <b>previsão de consumo para todo o semestre</b>. Informe a quantidade TOTAL estimada que seu setor necessitará durante o período selecionado — não a quantidade mensal.</p>
+        </div>
+
+        <div class="stepper" id="stepper">
+          <div class="step active" data-step="1"><span class="num">1</span> Identificação</div>
+          <div class="step" data-step="2"><span class="num">2</span> Responsáveis</div>
+          <div class="step" data-step="3"><span class="num">3</span> Contato</div>
+          <div class="step" data-step="4"><span class="num">4</span> Demanda</div>
+          <div class="step" data-step="5"><span class="num">5</span> Revisão</div>
+          <div class="step" data-step="6"><span class="num">6</span> Envio</div>
+        </div>
+
+        <!-- ETAPA 1 -->
+        <div id="etapa-1" class="card etapa">
+          <h2><span class="ico">🏛️</span> 1. Identificação</h2>
+          <p class="sub">Selecione o departamento e informe o setor demandante.</p>
+          <div class="grid two">
+            <div class="field" id="f-departamento">
+              <label>Departamento <span class="req">*</span></label>
+              <select id="sel-departamento"><option value="">— Selecione o departamento —</option></select>
+            </div>
+            <div class="field" id="f-setor">
+              <label>Setor Demandante <span class="req">*</span></label>
+              <input type="text" id="inp-setor-manual" placeholder="Clique aqui e digite o nome do setor por extenso" autocomplete="off" />
+              <div class="hint" id="hint-setor">⚠️ Clique na caixa e informe o nome do setor por extenso (ex.: Laboratório de Química Analítica).</div>
+            </div>
+            <div class="field" id="f-semestre">
+              <label>Semestre da Demanda <span class="req">*</span></label>
+              <select id="sel-semestre"></select>
+              <div class="hint">A demanda refere-se a TODO o semestre selecionado.</div>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn btn-primary" onclick="App.avancar(2)">Avançar →</button>
+          </div>
+        </div>
+
+        <!-- ETAPA 2 -->
+        <div id="etapa-2" class="card etapa" style="display:none">
+          <h2><span class="ico">👤</span> 2. Responsáveis</h2>
+          <p class="sub">Informe o responsável administrativo/técnico e a chefia do setor. Podem ser a mesma pessoa.</p>
+          <div class="grid two">
+            <div class="field" id="f-responsavel">
+              <label>Responsável Administrativo ou Técnico <span class="req">*</span></label>
+              <input type="text" id="inp-responsavel" placeholder="Nome completo" autocomplete="off" />
+              <div class="hint">Pessoa que normalmente recebe/auxilia na administração do local.</div>
+            </div>
+            <div class="field" id="f-chefia">
+              <label>Chefia do Setor <span class="req">*</span></label>
+              <input type="text" id="inp-chefia" placeholder="Nome completo" autocomplete="off" />
+              <label style="margin-top:8px;font-weight:400;font-size:12px;display:flex;align-items:center;gap:6px;cursor:pointer">
+                <input type="checkbox" id="chk-mesma-pessoa" style="width:auto" />
+                A chefia é a mesma pessoa do responsável
+              </label>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn btn-outline" onclick="App.voltar(1)">← Voltar</button>
+            <button class="btn btn-primary" onclick="App.avancar(3)">Avançar →</button>
+          </div>
+        </div>
+
+        <!-- ETAPA 3 -->
+        <div id="etapa-3" class="card etapa" style="display:none">
+          <h2><span class="ico">📞</span> 3. Contato e Matrícula</h2>
+          <p class="sub">Dados de contato do responsável e do setor.</p>
+          <div class="grid two">
+            <div class="field" id="f-telefone">
+              <label>WhatsApp / Telefone <span class="req">*</span></label>
+              <input type="tel" id="inp-telefone" placeholder="(83) 99999-9999" />
+            </div>
+            <div class="field" id="f-email">
+              <label>E-mail do Setor ou Responsável <span class="req">*</span></label>
+              <input type="email" id="inp-email" placeholder="setor@ct.ufpb.br" />
+            </div>
+            <div class="field" id="f-matricula">
+              <label>Matrícula do Responsável <span class="req">*</span></label>
+              <input type="text" id="inp-matricula" placeholder="Ex.: 1234567" />
+            </div>
+            <div class="field">
+              <label>Observação</label>
+              <textarea id="inp-observacao" placeholder="Informações adicionais (opcional)"></textarea>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn btn-outline" onclick="App.voltar(2)">← Voltar</button>
+            <button class="btn btn-primary" onclick="App.avancar(4)">Avançar →</button>
+          </div>
+        </div>
+
+        <!-- ETAPA 4 -->
+        <div id="etapa-4" class="card etapa" style="display:none">
+          <h2><span class="ico">📦</span> 4. Demanda Semestral de Materiais</h2>
+          <p class="sub">Escolha o grupo, selecione os materiais e informe a quantidade TOTAL para o semestre.</p>
+          <div class="alert alert-warn">
+            <span>⚠️</span>
+            <div><b>Atenção:</b> informe a quantidade TOTAL estimada para <b>todo o semestre</b>, não a quantidade mensal. Esta é uma previsão para planejamento — não representa baixa imediata de estoque.</div>
+          </div>
+          <div class="field" style="margin-bottom:14px">
+            <label>Grupo de Material</label>
+            <select id="sel-grupo"><option value="">— Selecione um grupo —</option></select>
+          </div>
+          <div id="lista-materiais">
+            <div class="empty"><div class="ico">📋</div>Selecione um grupo acima para visualizar os materiais.</div>
+          </div>
+          <div class="card" style="margin-top:20px;background:var(--cinza-50)">
+            <h2 style="font-size:15px"><span class="ico">🛒</span> Minha Demanda Semestral</h2>
+            <div id="cart-items">
+              <div class="empty" style="padding:16px">Nenhum material adicionado ainda.</div>
+            </div>
+            <div class="cart-total">
+              <span>Materiais: <b id="cart-count">0</b></span>
+              <span>Total de unidades: <b id="cart-total">0</b></span>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn btn-outline" onclick="App.voltar(3)">← Voltar</button>
+            <button class="btn btn-primary" onclick="App.avancar(5)">Revisar Demanda →</button>
+          </div>
+        </div>
+
+        <!-- ETAPA 5 -->
+        <div id="etapa-5" class="card etapa" style="display:none">
+          <h2><span class="ico">✅</span> Confira sua Demanda Semestral</h2>
+          <p class="sub">Revise todas as informações antes de enviar.</p>
+          <div class="revisao-bloco">
+            <h3>Dados do Solicitante</h3>
+            <div class="revisao-grid" id="rev-dados"></div>
+          </div>
+          <div class="revisao-bloco">
+            <h3>Materiais Solicitados</h3>
+            <div class="table-wrap">
+              <table id="rev-tabela">
+                <thead>
+                  <tr>
+                    <th>Grupo</th><th>Material</th><th>Código</th>
+                    <th class="num">Saldo</th><th class="num">Qtd.</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn btn-outline" onclick="App.voltar(4)">✏️ Editar Demanda</button>
+            <button class="btn btn-success" onclick="App.enviar()">✅ Confirmar e Enviar</button>
+          </div>
+        </div>
+
+        <!-- ETAPA 6 -->
+        <div id="etapa-6" class="card etapa" style="display:none">
+          <div class="sucesso-box">
+            <div class="check">✓</div>
+            <h2>Demanda enviada com sucesso!</h2>
+            <p class="sub">Sua demanda semestral foi registrada.</p>
+            <div class="id-demanda" id="sucesso-id">DEM-0000-00000</div>
+            <div id="sucesso-detalhes" style="margin-top:16px;text-align:left;max-width:520px;margin-left:auto;margin-right:auto"></div>
+            <div class="actions" style="justify-content:center;margin-top:24px">
+              <button class="btn btn-outline" onclick="App.imprimirComprovante()">🖨️ Imprimir / Salvar Comprovante</button>
+              <button class="btn btn-primary" onclick="App.novoPedido()">➕ Novo Pedido</button>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ======================================================
+           VIEW: PEDIDOS
+           ====================================================== -->
+      <section id="view-pedidos" class="view">
+        <div class="filters-bar">
+          <div class="filters-header">
+            <div class="filters-title">
+              <span class="ico">🔎</span> Filtros
+              <span class="filters-count" id="filtros-count-pedidos">0</span>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-outline btn-sm" onclick="Filters.clear()">Limpar filtros</button>
+              <button class="btn btn-outline btn-sm" onclick="PedidosTable.exportCSV()">⬇️ CSV</button>
+            </div>
+          </div>
+          <div class="filtros">
+            <div class="filter-group">
+              <label>Semestre</label>
+              <select id="flt-semestre"><option value="">Todos</option></select>
+            </div>
+            <div class="filter-group">
+              <label>Departamento</label>
+              <select id="flt-departamento"><option value="">Todos</option></select>
+            </div>
+            <div class="filter-group">
+              <label>Setor</label>
+              <select id="flt-setor"><option value="">Todos</option></select>
+            </div>
+            <div class="filter-group">
+              <label>Status</label>
+              <select id="flt-status"><option value="">Todos</option></select>
+            </div>
+            <div class="filter-group">
+              <label>Data inicial</label>
+              <input type="date" id="flt-data-ini" />
+            </div>
+            <div class="filter-group">
+              <label>Data final</label>
+              <input type="date" id="flt-data-fim" />
+            </div>
+            <div class="filter-group" style="grid-column:span 2">
+              <label>Buscar (ID, material, código, responsável)</label>
+              <input type="text" id="flt-busca" placeholder="Digite para buscar..." />
+            </div>
+          </div>
+        </div>
+
+        <div class="card flush">
+          <div class="card-header">
+            <h2><span class="ico">📦</span> Pedidos Recebidos</h2>
+            <span class="badge" id="pedidos-total" style="margin-left:auto">0 pedidos</span>
+          </div>
+          <div class="table-wrap" style="border:none;border-radius:0">
+            <table id="tbl-pedidos">
+              <thead>
+                <tr>
+                  <th class="sortable" data-sort="id">ID <span class="sort-ind">↕</span></th>
+                  <th class="sortable" data-sort="dataHora">Data/Hora <span class="sort-ind">↕</span></th>
+                  <th class="sortable" data-sort="semestre">Semestre <span class="sort-ind">↕</span></th>
+                  <th class="sortable" data-sort="departamento">Departamento <span class="sort-ind">↕</span></th>
+                  <th class="sortable" data-sort="setor">Setor <span class="sort-ind">↕</span></th>
+                  <th class="num sortable" data-sort="itensCount">Itens <span class="sort-ind">↕</span></th>
+                  <th class="num sortable" data-sort="totalQtd">Qtd <span class="sort-ind">↕</span></th>
+                  <th>Status</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div class="pagination" id="pedidos-pagination"></div>
+        </div>
+      </section>
+
+      <!-- ======================================================
+           VIEW: DEPARTAMENTOS
+           ====================================================== -->
+      <section id="view-departamentos" class="view">
+        <div class="card flush">
+          <div class="card-header">
+            <h2><span class="ico">🏛️</span> Análise por Departamento</h2>
+            <span class="badge" id="deps-total" style="margin-left:auto">0 departamentos</span>
+          </div>
+          <div class="card-body">
+            <div class="chart-container" id="chart-deps-analise"></div>
+          </div>
+        </div>
+
+        <div class="card flush">
+          <div class="card-header">
+            <h2><span class="ico">📋</span> Detalhamento</h2>
+          </div>
+          <div class="table-wrap" style="border:none;border-radius:0">
+            <table id="tbl-departamentos">
+              <thead><tr>
+                <th>Departamento</th>
+                <th class="num">Pedidos</th>
+                <th class="num">Linhas de Itens</th>
+                <th class="num">Qtd Total</th>
+                <th class="num">% do Total</th>
+                <th class="num">Materiais Distintos</th>
+                <th></th>
+              </tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================
+           VIEW: SETORES
+           ====================================================== -->
+      <section id="view-setores" class="view">
+        <div class="filters-bar">
+          <div class="filters-header">
+            <div class="filters-title">
+              <span class="ico">🏢</span> Análise por Setor
+            </div>
+          </div>
+          <div class="filtros">
+            <div class="filter-group">
+              <label>Departamento</label>
+              <select id="flt-setor-dep"><option value="">Todos os departamentos</option></select>
+            </div>
+            <div class="filter-group">
+              <label>Semestre</label>
+              <select id="flt-setor-sem"><option value="">Todos</option></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="card flush">
+          <div class="card-header">
+            <h2><span class="ico">📊</span> Setores por Volume de Demanda</h2>
+          </div>
+          <div class="card-body">
+            <div class="chart-container" id="chart-setores-analise"></div>
+          </div>
+        </div>
+
+        <div class="card flush">
+          <div class="card-header">
+            <h2><span class="ico">📋</span> Detalhamento por Setor</h2>
+          </div>
+          <div class="table-wrap" style="border:none;border-radius:0">
+            <table id="tbl-setores">
+              <thead><tr>
+                <th>Departamento</th><th>Setor</th>
+                <th class="num">Pedidos</th>
+                <th class="num">Linhas</th>
+                <th class="num">Qtd Total</th>
+                <th class="num">Materiais Distintos</th>
+              </tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================
+           VIEW: CONSOLIDAÇÃO
+           ====================================================== -->
+      <section id="view-consolidacao" class="view">
+        <div class="filters-bar">
+          <div class="filters-header">
+            <div class="filters-title">
+              <span class="ico">📈</span> Consolidação de Materiais
+              <span class="filters-count" id="cons-count">0</span>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-outline btn-sm" onclick="Filters.clear()">Limpar filtros</button>
+              <button class="btn btn-outline btn-sm" onclick="Consolidacao.exportCSV()">⬇️ CSV</button>
+            </div>
+          </div>
+          <div class="filtros">
+            <div class="filter-group">
+              <label>Grupo</label>
+              <select id="flt-cons-grupo"><option value="">Todos</option></select>
+            </div>
+            <div class="filter-group" style="grid-column:span 3">
+              <label>Buscar material</label>
+              <input type="text" id="flt-cons-busca" placeholder="Nome ou código do material..." />
+            </div>
+          </div>
+        </div>
+
+        <div class="card flush">
+          <div class="card-header">
+            <h2><span class="ico">📦</span> Demanda Consolidada por Material</h2>
+            <span class="badge" id="cons-total-materiais" style="margin-left:auto">0 materiais</span>
+          </div>
+          <div class="table-wrap" style="border:none;border-radius:0">
+            <table id="tbl-consolidacao">
+              <thead><tr>
+                <th>Código</th><th>Material</th><th>Grupo</th>
+                <th class="num">Qtd Total</th>
+                <th class="num">Nº Pedidos</th>
+                <th>Setores Solicitantes</th>
+                <th>Departamentos</th>
+              </tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================
+           VIEW: RELATÓRIOS
+           ====================================================== -->
+      <section id="view-relatorios" class="view">
+        <div class="alert alert-info">
+          <span>ℹ️</span>
+          <div>Os relatórios utilizam <b>exatamente os dados filtrados na tela atual</b>. Ajuste os filtros na seção <b>Pedidos</b> antes de gerar.</div>
+        </div>
+
+        <div class="card">
+          <h2><span class="ico">📄</span> Gerar Relatório</h2>
+          <p class="sub">Escolha o tipo de relatório e o formato de saída.</p>
+          <div class="grid two" style="margin-bottom:14px">
+            <div class="field">
+              <label>Tipo de relatório</label>
+              <select id="rep-tipo">
+                <option value="geral">Relatório Geral</option>
+                <option value="departamento">Por Departamento</option>
+                <option value="setor">Por Setor</option>
+                <option value="periodo">Por Período</option>
+                <option value="filtros">Utilizar filtros atuais</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Departamento (opcional)</label>
+              <select id="rep-dep"><option value="">Todos</option></select>
+            </div>
+            <div class="field">
+              <label>Setor (opcional)</label>
+              <select id="rep-setor"><option value="">Todos</option></select>
+            </div>
+            <div class="field">
+              <label>Semestre (opcional)</label>
+              <select id="rep-sem"><option value="">Todos</option></select>
+            </div>
+            <div class="field">
+              <label>Data inicial (opcional)</label>
+              <input type="date" id="rep-data-ini" />
+            </div>
+            <div class="field">
+              <label>Data final (opcional)</label>
+              <input type="date" id="rep-data-fim" />
+            </div>
+          </div>
+          <div class="actions" style="justify-content:flex-start">
+            <button class="btn btn-primary" onclick="Relatorios.gerar('pdf')">📄 Gerar PDF</button>
+            <button class="btn btn-outline" onclick="Relatorios.gerar('csv')">⬇️ Gerar CSV</button>
+            <button class="btn btn-outline" onclick="Relatorios.gerar('xls')">📊 Gerar Excel</button>
+          </div>
+        </div>
+
+        <div class="report-grid">
+          <div class="report-card">
+            <div class="rc-icon">📊</div>
+            <h3>Relatório Geral</h3>
+            <p>Todos os pedidos registrados no sistema, com KPIs consolidados e tabela detalhada.</p>
+            <div class="rc-actions">
+              <button class="btn btn-outline btn-sm" onclick="Relatorios.gerar('pdf',{tipo:'geral'})">PDF</button>
+              <button class="btn btn-outline btn-sm" onclick="Relatorios.gerar('csv',{tipo:'geral'})">CSV</button>
+            </div>
+          </div>
+          <div class="report-card">
+            <div class="rc-icon">🏛️</div>
+            <h3>Por Departamento</h3>
+            <p>Consolidado por departamento: pedidos, itens e quantidade total demandada.</p>
+            <div class="rc-actions">
+              <button class="btn btn-outline btn-sm" onclick="Relatorios.gerar('pdf',{tipo:'departamento'})">PDF</button>
+              <button class="btn btn-outline btn-sm" onclick="Relatorios.gerar('csv',{tipo:'departamento'})">CSV</button>
+            </div>
+          </div>
+          <div class="report-card">
+            <div class="rc-icon">🏢</div>
+            <h3>Por Setor</h3>
+            <p>Detalhamento por setor demandante com quantitativos e participação.</p>
+            <div class="rc-actions">
+              <button class="btn btn-outline btn-sm" onclick="Relatorios.gerar('pdf',{tipo:'setor'})">PDF</button>
+              <button class="btn btn-outline btn-sm" onclick="Relatorios.gerar('csv',{tipo:'setor'})">CSV</button>
+            </div>
+          </div>
+          <div class="report-card">
+            <div class="rc-icon">📅</div>
+            <h3>Por Período</h3>
+            <p>Evolução das solicitações ao longo do tempo, com filtros de data.</p>
+            <div class="rc-actions">
+              <button class="btn btn-outline btn-sm" onclick="Relatorios.gerar('pdf',{tipo:'periodo'})">PDF</button>
+              <button class="btn btn-outline btn-sm" onclick="Relatorios.gerar('csv',{tipo:'periodo'})">CSV</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================
+           VIEW: ADMIN (painel antigo mantido)
+           ====================================================== -->
+      <section id="view-admin" class="view">
+        <div class="card">
+          <h2><span class="ico">⚙️</span> Painel Administrativo <span class="admin-badge">ADMIN</span></h2>
+          <p class="sub">Diagnóstico e exportação bruta dos dados.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-outline btn-sm" onclick="Admin.render()">🔄 Atualizar</button>
+            <button class="btn btn-outline btn-sm" onclick="Admin.exportarCSV()">⬇️ Exportar CSV (bruto)</button>
+            <button class="btn btn-outline btn-sm" onclick="Admin.diagnosticarAPI()">🩺 Diagnosticar API</button>
+          </div>
+          <div id="adm-diag" style="margin-top:10px;font-size:12px;color:var(--cinza-500)"></div>
+        </div>
+
+        <div class="kpi-grid" id="adm-kpis"></div>
+
+        <div class="card flush">
+          <div class="card-header"><h2><span class="ico">📋</span> Todas as Demandas</h2></div>
+          <div class="table-wrap" style="border:none;border-radius:0">
+            <table id="adm-tabela-demandas">
+              <thead><tr>
+                <th>ID</th><th>Data/Hora</th><th>Semestre</th>
+                <th>Departamento</th><th>Setor</th>
+                <th class="num">Itens</th><th class="num">Qtd</th><th>Status</th>
+              </tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- Modal de detalhes -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modal-title">Detalhes do Pedido</h2>
+      <button class="btn-close" onclick="UI.closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="UI.closeModal()">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   BASE DE MATERIAIS (FALLBACK) — INALTERADA
+   ============================================================ */
+window.__MATERIAIS_FALLBACK__ = [
+  {"grupo":"3003","descGrupo":"Combustíveis e derivados","codigo":"3003000000104","material":"QUEROSENE FILTRADO ACONDICIONADO EM EMBALAGEM PLÁSTICA COM TAMPA E BICO DOSADOR. COMPOSIÇÃO PRINCIPAL: HIDROCARBONETOS.","saldo":34},
+  {"grupo":"3007","descGrupo":"Água mineral e bebidas","codigo":"3007000003224","material":"ITEM 01 - ÁGUA MINERAL NATURAL, SEM GÁS, ACONDICIONADA EM EMBALAGEM RETORNÁVEL, GARRAFÃO COM CAPACIDADE DE 20 LITROS","saldo":30},
+  {"grupo":"3011","descGrupo":"Produtos químicos, reagentes e insumos laboratoriais","codigo":"3011000007529","material":"01 - CLORETO DE COBALTO II, ASPECTO FÍSICO:CRISTAL ROSA A VERMELHO, 98%, ACS. OBS: INTENCIONAR A QUANTIDADE TOTAL DE GRAMAS QUE PRETENDE ADQUIRIR. A QUANTIDADE DEVERÁ SER DIVISÍVEL POR 250G QUE SERÁ A FORMA DE ENTREGA.","saldo":50},
+  {"grupo":"3011","descGrupo":"Produtos químicos, reagentes e insumos laboratoriais","codigo":"3011000007421","material":"01 - ÁCIDO OXÁLICO, ASPECTO FÍSICO CRISTAL OU PÓ BRANCO CRISTALINO HIGROSCÓPICO. OBS: INTENCIONAR A QUANTIDADE TOTAL DE GRAMAS QUE PRETENDE ADQUIRIR. A QUANTIDADE DEVERÁ SER DIVISÍVEL POR 500G QUE SERÁ A FORMA DE ENTREGA.","saldo":1},
+  {"grupo":"3011","descGrupo":"Produtos químicos, reagentes e insumos laboratoriais","codigo":"3011000008507","material":"1-BUTANOL; N-BUTANOL; ÁLCOOL N-BUTÍLICO - ALPHATEC 1000 ML","saldo":5},
+  {"grupo":"3011","descGrupo":"Produtos químicos, reagentes e insumos laboratoriais","codigo":"3011000008940","material":"ACETONA, ASPECTO FÍSICO: LÍQUIDO LÍMPIDO TRANSPARENTE. FRASCO COM 1 LITRO.","saldo":7},
+  {"grupo":"3011","descGrupo":"Produtos químicos, reagentes e insumos laboratoriais","codigo":"3011000007863","material":"BALÃO VOLUMETRICO, 1000ML, VIDRO, COM TAMPA","saldo":6},
+  {"grupo":"3011","descGrupo":"Produtos químicos, reagentes e insumos laboratoriais","codigo":"3011000009008","material":"BROMETO DE CETILTRIMETILAMÔNIO, ASPECTO FÍSICO:PÓ BRANCO CRISTALINO, FÓRMULA QUÍMICA:(CH3) (CH2)15N(BR)(CH3)3, PESO MOLECULAR:364,45 G/MOL, GRAU DE PUREZA:PUREZA MÍNIMA DE 99%","saldo":1},
+  {"grupo":"3011","descGrupo":"Produtos químicos, reagentes e insumos laboratoriais","codigo":"3011000008972","material":"CALDO E. COLI","saldo":1},
+  {"grupo":"3011","descGrupo":"Produtos químicos, reagentes e insumos laboratoriais","codigo":"3011000008973","material":"CALDO LAURIL SULFATO TRIPTOSE","saldo":1},
+  {"grupo":"3011","descGrupo":"Produtos químicos, reagentes e insumos laboratoriais","codigo":"3011000007537","material":"CARBONATO DE CÁLCIO, ASPECTO FÍSICO PRECIPITADO, PÓ BRANCO, FINO, INODORO","saldo":8},
+  {"grupo":"3011","descGrupo":"Produtos químicos, reagentes e insumos laboratoriais","codigo":"3011000006749","material":"CARBONATO DE CÁLCIO, ASPECTO FÍSICO PRECIPITADO,PÓ BRANCO, FINO, INODORO. MATERIAL FORNECIDO EM FRASCOS COM 1KG.","saldo":4},
+  {"grupo":"3011","descGrupo":"Produtos químicos, reagentes e insumos laboratoriais","codigo":"3011000008415","material":"CARBONATO DE SÓDIO (TIPO BARRILHA), PÓ BRANCO, INODORO, NA2CO3 ANIDRO, 105,99 G/MOL, PARA FABRICAÇÃO DE SABÃO.","saldo":4},
+  {"grupo":"3011","descGrupo":"Produtos químicos, reagentes e insumos laboratoriais","codigo":"3011000007029","material":"CLORETO DE SÓDIO P.A., APRESENTAÇÃO SÓLIDO, FRASCO DE 1000G","saldo":14},
+  {"grupo":"3011","descGrupo":"Produtos químicos, reagentes e insumos laboratoriais","codigo":"3011000006729","material":"CLOROFÓRMIO, ASPECTO FÍSICO: LÍQUIDO CLARO, INCOLOR, ODOR FORTE CARACTERÍSTICO, PESO MOLECULAR: 119,38 G,MOL. APRESENTAÇÃO: LITRO","saldo":10},
+  {"grupo":"3011","descGrupo":"Produtos químicos, reagentes e insumos laboratoriais","codigo":"3011000007374","material":"CORANTE, CONJUNTO COLORAÇÃO DE TRICRÔMIO DE MASSON, HEMATOXILINA WEIGERT, ÁCIDO PÍCRICO, FUCSINA MALLORY, AZUL ANILINA MASSON, FRASCO COM 1000ML","saldo":0.1},
+  {"grupo":"3011","descGrupo":"Produtos químicos, reagentes e insumos laboratoriais","codigo":"3011000008830","material":"CUMARINA - GRAMA","saldo":250},
+  {"grupo":"3011","descGrupo":"Produtos químicos, reagentes e insumos laboratoriais","codigo":"3011000008121","material":"HIDROXIDO DE SODIO MICROPEROLAS PA ACS (SODAPEROLA) 500G","saldo":42},
+  {"grupo":"3011","descGrupo":"Produtos químicos, reagentes e insumos laboratoriais","codigo":"3011000009039","material":"HIDRÓXIDO DE SÓDIO, ASPECTO FÍSICO ESCAMAS ESBRANQUIÇADAS, ALTAMENTE HIGROSCÓPICO, PESO MOLECULAR 40, FÓRMULA QUÍMICA NAOH, GRAU DE PUREZA PUREZA MÍNIMA DE 95, CARACTERÍSTICA ADICIONAL SODA CÁUSTICA COMERCIAL, NÚMERO DE REFERÊNCIA QUÍMICA CAS 1310- 73-2","saldo":2},
+  {"grupo":"3011","descGrupo":"Produtos químicos, reagentes e insumos laboratoriais","codigo":"3011000009036","material":"HIPOCLORITO DE SÓDIO, ASPECTO FÍSICO LÍQUIDO AMARELO ESVERDEADO, CONCENTRAÇÃO TEOR MÍNIMO DE 12 DE CLORO ATIVO, CARACTERÍSTICAS ADICIONAIS ESTABILIZADO","saldo":3},
+  {"grupo":"3011","descGrupo":"Produtos químicos, reagentes e insumos laboratoriais","codigo":"3011000006661","material":"INSETICIDA LÍQUIDO EM SPRAY AEROSOL","saldo":42},
+  {"grupo":"3011","descGrupo":"Produtos químicos, reagentes e insumos laboratoriais","codigo":"3011000006899","material":"MEIO DE CULTURA, TIPO ÁGAR PCA CT - DEPARTAMENTO DE","saldo":1},
+  {"grupo":"3011","descGrupo":"Produtos químicos, reagentes e insumos laboratoriais","codigo":"3011000009057","material":"MEIO DE CULTURA, TIPO: CALDO MUELLER HINTON, APRESENTAÇÃO:PÓ. FORMA DE APRESENTAÇÃO: FRASCO 500G","saldo":2},
+  {"grupo":"3011","descGrupo":"Produtos químicos, reagentes e insumos laboratoriais","codigo":"3011000007079","material":"NITRATO DE COBALTO, ASPECTO FÍSICO:PÓ VERMELHO CRISTALINO, LEVE ODOR DE ÁCIDO NÍTRICO, FÓRMULA QUÍMICA: CO(NO3)2.6H2O (COBALTO II). FORMA DE APRESENTAÇÃO: FRASCO COM 250 G","saldo":4},
+  {"grupo":"3011","descGrupo":"Produtos químicos, reagentes e insumos laboratoriais","codigo":"3011000008991","material":"NITRATO DE CÁDMIO","saldo":1},
+  {"grupo":"3011","descGrupo":"Produtos químicos, reagentes e insumos laboratoriais","codigo":"3011000007083","material":"NITRATO DE LANTÂNIO PH 0 A 14 GRADUAÇÃO DE 1.","saldo":3},
+  {"grupo":"3011","descGrupo":"Produtos químicos, reagentes e insumos laboratoriais","codigo":"3011000009038","material":"PIRIDINA, ASPECTO FÍSICO:LÍQUIDO INCOLOR OU AMARELADO, 99%. EMBALAGEM COM 1 LITRO.","saldo":1},
+  {"grupo":"3011","descGrupo":"Produtos químicos, reagentes e insumos laboratoriais","codigo":"3011000007206","material":"SOLUÇÃO TAMPÃO LEITURA PH 4,0, APLICAÇÃO CALIBRAGEM DE PEAGÂMETRO. FORMA DE APRESENTAÇÃO: FRASCO COM 500 ML","saldo":3},
+  {"grupo":"3011","descGrupo":"Produtos químicos, reagentes e insumos laboratoriais","codigo":"3011000007643","material":"SOLUÇÃO TAMPÃO LEITURA PH 7,0, APLICAÇÃO CALIBRAGEM DE PEAGÂMETRO. COTAÇÃO E FORNECIMENTO: FRASCO COM 500 ML","saldo":2},
+  {"grupo":"3011","descGrupo":"Produtos químicos, reagentes e insumos laboratoriais","codigo":"3011000008829","material":"VANILINA, ASPECTO FÍSICO PÓ CRISTALINO BRANCO - GRAMA","saldo":99},
+  {"grupo":"3011","descGrupo":"Produtos químicos, reagentes e insumos laboratoriais","codigo":"3011000007377","material":"XILOL: REAGENTE, ASPECTO FÍSICO LÍQUIDO, APLICAÇÃO CITOLOGIA, TIPO XILOL P.A., EMBALAGEM EM FRASCO DE VIBRO ÂMBAR. (LITRO)","saldo":8},
+  {"grupo":"3011","descGrupo":"Produtos químicos, reagentes e insumos laboratoriais","codigo":"3011000007402","material":"ÁCIDO ACÉTICO, ASPECTO FÍSICO LÍQUIDO LÍMPIDO TRANSPARENTE - FRASCO COM 1L","saldo":10},
+  {"grupo":"3011","descGrupo":"Produtos químicos, reagentes e insumos laboratoriais","codigo":"3011000007347","material":"ÁCIDO BÓRICO P.A. ACS, SINÔNIMO: ÁCIDO BORÁCICO, NR CAS: 10043353, PUREZA: 99,5%, HIDRATAÇÃO: ANIDRO, FÓRMULA: H3BO3, MASSA: 61.00%. FRASCO 1KG","saldo":2},
+  {"grupo":"3011","descGrupo":"Produtos químicos, reagentes e insumos laboratoriais","codigo":"3011000008944","material":"ÁCIDO CLORÍDRICO, ASPECTO FÍSICO: LÍQUIDO LÍMPIDO, INCOLOR AMARELADO, FUMEGANTE. FRASCO COM 1 LITRO.","saldo":3},
+  {"grupo":"3011","descGrupo":"Produtos químicos, reagentes e insumos laboratoriais","codigo":"3011000008825","material":"ÁCIDO CÍTRICO P.A. FÓRMULA QUÍMICA: C6H8O7 - FRASCO COM 1000ML","saldo":1},
+  {"grupo":"3011","descGrupo":"Produtos químicos, reagentes e insumos laboratoriais","codigo":"3011000007441","material":"ÁCIDO FOSFÓRICO (OU ÁCIDO ORTOFOSFÓRICO), ASPECTO FÍSICO LÍQUIDO INCOLOR - PARTICIPANTE NO PREGÃO 01/2017 DA UASG 153045 UFC","saldo":4},
+  {"grupo":"3011","descGrupo":"Produtos químicos, reagentes e insumos laboratoriais","codigo":"3011000006975","material":"ÁCIDO GÁLICO, COMPOSIÇÃO QUÍMICA C6H2(OH)3COOH ANIDRO","saldo":4},
+  {"grupo":"3011","descGrupo":"Produtos químicos, reagentes e insumos laboratoriais","codigo":"3011000007327","material":"ÁCIDO OXÁLICO, ASPECTO FÍSICO CRISTAL OU PÓ BRANCO CRISTALINO HIGROSCÓPICO","saldo":1},
+  {"grupo":"3011","descGrupo":"Produtos químicos, reagentes e insumos laboratoriais","codigo":"3011000007463","material":"ÁCIDO TÂNICO, ASPECTO FÍSICO PÓ MARROM AMARELADO, FÓRMULA QUÍMICA C76H52O46","saldo":2},
+  {"grupo":"3011","descGrupo":"Produtos químicos, reagentes e insumos laboratoriais","codigo":"3011000009054","material":"ÁGAR SABOURAUD; MEIO DE CULTURA, TIPO ÁGAR SABOURAUD, APRESENTAÇÃO PÓ, ADITIVOS COM CLORANFENICOL","saldo":1},
+  {"grupo":"3011","descGrupo":"Produtos químicos, reagentes e insumos laboratoriais","codigo":"3011000008831","material":"ÁLCOOL ETÍLICO, TIPO HIDRATADO,TEOR ALCOÓLICO 70% - APRESENTAÇÃO LÍQUIDO. COTAÇÃO E UNIDADE DE FORNECIMENTO EM LITRO","saldo":220},
+  {"grupo":"3016","descGrupo":"Material de expediente e papelaria","codigo":"3016000005937","material":"001 CARIMBO AUTOMÁTICO 7,5X3,8CM","saldo":3},
+  {"grupo":"3016","descGrupo":"Material de expediente e papelaria","codigo":"3016000006196","material":"CANETA ESFEROGRÁFICA ESCRITA FINA TIPO CRISTAL, TINTA COR AZUL.","saldo":800},
+  {"grupo":"3016","descGrupo":"Material de expediente e papelaria","codigo":"3016000006197","material":"CANETA ESFEROGRÁFICA ESCRITA FINA TIPO CRISTAL, TINTA COR PRETA.","saldo":186},
+  {"grupo":"3016","descGrupo":"Material de expediente e papelaria","codigo":"3016000006198","material":"CANETA ESFEROGRÁFICA ESCRITA FINA TIPO CRISTAL, TINTA COR VERMELHA.","saldo":114},
+  {"grupo":"3016","descGrupo":"Material de expediente e papelaria","codigo":"3016000006035","material":"PAPEL SULFITE A4. GRAMATURA: 75G/M² DIMENSÕES: 210 MM (LARGURA) X 297 MM (COMPRIMENTO). COR: BRANCA","saldo":450},
+  {"grupo":"3016","descGrupo":"Material de expediente e papelaria","codigo":"3016000006422","material":"PAPEL A4 , GRAMATURA DE 90G/M².COR BRANCA. EMBALAGEM LACRADA DE FÁBRICA. CADA PACOTE DEVERÁ CONTER 500 FOLHAS, (RESMA), EMBALAGEM INDIVIDUAL COM PAPEL PROTETOR CONTRA UMIDADE.","saldo":205},
+  {"grupo":"3017","descGrupo":"Informática, periféricos e suprimentos de impressão","codigo":"3017000002009","material":"MOUSE OPTICO USB 3 BOTÕES","saldo":62},
+  {"grupo":"3017","descGrupo":"Informática, periféricos e suprimentos de impressão","codigo":"3017000004062","material":"CARTUCHO DE TONER IMPRESSÃO LASER PRETO MLT-D203L","saldo":22},
+  {"grupo":"3019","descGrupo":"Materiais e recipientes plásticos","codigo":"3019000001241","material":"CAIXA ORGANIZADORA PLÁSTICA COM TAMPA, MATERIAL POLIPROPILENO, TRANSPARENTE. CAPACIDADE MÍNIMA 30 LITROS","saldo":42},
+  {"grupo":"3021","descGrupo":"Copa, cozinha e materiais para alimentação","codigo":"3021000001835","material":"COPO DESCARTÁVEL 180 ML","saldo":1505},
+  {"grupo":"3022","descGrupo":"Materiais de limpeza, higiene e acondicionamento","codigo":"3022000002086","material":"SABONETE LÍQUIDO CREMOSO (SACHE COM 800 ML)","saldo":617},
+  {"grupo":"3022","descGrupo":"Materiais de limpeza, higiene e acondicionamento","codigo":"3022000002014","material":"ESPONJA DUPLA-FACE PACOTE C/ 03 UNIDADES","saldo":1539},
+  {"grupo":"3026","descGrupo":"Pilhas, baterias, cabos e acessórios elétricos","codigo":"3026000006943","material":"PILHA ALCALINA AAA. TIPO: PALITO; APRESENTAR TENSÃO 1,5V; MODELO AAA; MÍNIMO DE QUANTITATIVO: CARTELA COM 4(QUATRO) UNIDADES","saldo":321},
+  {"grupo":"3035","descGrupo":"Materiais e vidrarias para laboratório","codigo":"3035000005852","material":"PLACA DE PETRI MATERIAL: PLÁSTICO, FORMATO: REDONDA, DIMENSÕES: CERCA DE 15 X 90 MM, ESTERILIDADE: ESTÉRIL, TIPO USO: DESCARTÁVEL.","saldo":920},
+  {"grupo":"3035","descGrupo":"Materiais e vidrarias para laboratório","codigo":"3035000005647","material":"BÉQUER, VIDRO, 250 ML - MATERIAL VIDRO","saldo":35},
+  {"grupo":"3036","descGrupo":"Materiais hospitalares, EPIs e insumos de saúde","codigo":"3036000009220","material":"ÁLCOOL ETÍLICO HIDRATADO A 96%, EMBALAGEM EM FRASCO COM 1L.","saldo":180}
+];
+
+/* ============================================================
+   MÓDULO API — INALTERADO (mesma URL, mesmas funções)
+   ============================================================ */
+const API = (() => {
+  const ENDPOINT = "https://script.google.com/macros/s/AKfycbzHquUmtGZqepBtwrarVSv9rIPrZhAunnZfZgEypdJ1X8IRQuzpp0QOV1LzJeYhvF71rQ/exec";
+  const MATERIAIS_FALLBACK = window.__MATERIAIS_FALLBACK__ || [];
+
+  const DEPARTAMENTOS = [
+    "Direção do Centro de Tecnologia - CT",
+    "Departamento de Arquitetura e Urbanismo - DAU",
+    "Departamento de Engenharia de Alimentos - DEA",
+    "Departamento de Engenharia de Materiais - DEMAT",
+    "Departamento de Engenharia de Produção - DEP",
+    "Departamento de Engenharia Civil e Ambiental - DECA",
+    "Departamento de Engenharia Mecânica - DEM",
+    "Departamento de Engenharia Química - DEQ"
+  ];
+
+  let _materiaisCache = null;
+  let _fonte = "desconhecida";
+
+  async function carregarMateriais() {
+    if (_materiaisCache) return _materiaisCache;
+    try {
+      const url = ENDPOINT + (ENDPOINT.includes("?") ? "&" : "?") + "action=materiais";
+      const resp = await fetch(url, { method: "GET", redirect: "follow" });
+      if (!resp.ok) throw new Error("HTTP " + resp.status);
+      const json = await resp.json();
+      const lista = Array.isArray(json) ? json
+                   : Array.isArray(json.materiais) ? json.materiais
+                   : Array.isArray(json.data) ? json.data
+                   : null;
+      if (!lista || !lista.length) throw new Error("API retornou vazio");
+      _materiaisCache = lista.map(normalizar).filter(m => m.codigo);
+      _fonte = "api";
+    } catch (e) {
+      console.warn("[API] Falha ao consultar endpoint, usando fallback local:", e.message);
+      _materiaisCache = MATERIAIS_FALLBACK.map(normalizar);
+      _fonte = "fallback";
+    }
+    UI.atualizarBadgeAPI();
+    return _materiaisCache;
+  }
+
+  function normalizar(m) {
+    return {
+      grupo: String(m.grupo ?? m.GRUPO ?? m["GRUPO"] ?? "").trim(),
+      descGrupo: String(m.descGrupo ?? m["DESCRIÇÃO DO GRUPO"] ?? m["DESCRICAO_DO_GRUPO"] ?? m.descricao_grupo ?? "").trim(),
+      codigo: String(m.codigo ?? m["CÓDIGO"] ?? m["CODIGO"] ?? m.codigo_material ?? "").trim(),
+      material: String(m.material ?? m["MATERIAL"] ?? m.descricao ?? "").trim(),
+      saldo: Number(m.saldo ?? m["SALDO_ESTOQUE_ATUAL"] ?? m.saldo_estoque ?? 0) || 0
+    };
+  }
+
+  function getDepartamentos() { return DEPARTAMENTOS.slice(); }
+  function getFonte() { return _fonte; }
+
+  async function enviarDemanda(payload) {
+    try {
+      const resp = await fetch(ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload),
+        redirect: "follow"
+      });
+      const text = await resp.text();
+      let json;
+      try { json = JSON.parse(text); } catch (e) { json = { ok: resp.ok }; }
+      if (json && json.ok === false) throw new Error(json.erro || "Erro no backend");
+      salvarLocal(payload);
+      return { ok: true, id: json.id_demanda || payload.id_demanda, fonte: "api" };
+    } catch (e) {
+      console.warn("[API] Envio via rede falhou, registrando localmente:", e.message);
+      salvarLocal(payload);
+      return { ok: true, id: payload.id_demanda, fonte: "local" };
+    }
+  }
+
+  function salvarLocal(payload) {
+    try {
+      const store = JSON.parse(localStorage.getItem("ct_demandas_local") || "[]");
+      if (!store.find(d => d.id_demanda === payload.id_demanda)) {
+        store.push(payload);
+        localStorage.setItem("ct_demandas_local", JSON.stringify(store));
+      }
+    } catch(e) {}
+  }
+
+  let _demandasCache = null;
+  let _demandasTime = 0;
+  const DEMANDAS_TTL = 30000; // 30s de cache
+
+  async function buscarDemandas(force=false) {
+    const now = Date.now();
+    if (!force && _demandasCache && (now - _demandasTime) < DEMANDAS_TTL) {
+      return _demandasCache;
+    }
+    let lista = null;
+    try {
+      const url = ENDPOINT + (ENDPOINT.includes("?") ? "&" : "?") + "action=demandas";
+      const r = await fetch(url, { redirect:"follow" });
+      if (r.ok) {
+        const j = await r.json();
+        lista = Array.isArray(j) ? j : j.demandas || j.data || [];
+      }
+    } catch(e) {
+      console.warn("[API] Falha ao buscar demandas, usando cache local:", e.message);
+    }
+    if (!lista || !lista.length) {
+      try { lista = JSON.parse(localStorage.getItem("ct_demandas_local") || "[]"); } catch(e) { lista = []; }
+    }
+    _demandasCache = lista;
+    _demandasTime = now;
+    return lista;
+  }
+
+  function invalidarCache() { _demandasCache = null; _demandasTime = 0; }
+
+  return { carregarMateriais, getDepartamentos, getFonte, enviarDemanda, buscarDemandas, invalidarCache, ENDPOINT };
+})();
+
+/* ============================================================
+   STATE (inalterado + extensões)
+   ============================================================ */
+const State = {
+  dados: {
+    departamento: "", setor: "", semestre: "",
+    responsavel: "", chefia: "", telefone: "", email: "",
+    matricula: "", observacao: ""
+  },
+  carrinho: [],
+  etapaAtual: 1,
+  ultimaDemanda: null,
+  demandas: [],
+
+  reset() {
+    this.dados = { departamento:"", setor:"", semestre:"", responsavel:"", chefia:"",
+                   telefone:"", email:"", matricula:"", observacao:"" };
+    this.carrinho = [];
+    this.etapaAtual = 1;
+  },
+  addItem(mat) {
+    if (this.carrinho.find(i => i.codigo === mat.codigo)) return { duplicado: true };
+    this.carrinho.push({ ...mat, qtd: mat.qtd });
+    return { duplicado: false };
+  },
+  removeItem(codigo) { this.carrinho = this.carrinho.filter(i => i.codigo !== codigo); },
+  updateQtd(codigo, qtd) {
+    const it = this.carrinho.find(i => i.codigo === codigo);
+    if (it) it.qtd = Math.max(1, Number(qtd) || 1);
+  },
+  totalItens() { return this.carrinho.length; },
+  totalUnidades() { return this.carrinho.reduce((s, i) => s + i.qtd, 0); }
+};
+
+/* ============================================================
+   UTIL (ampliado)
+   ============================================================ */
+const Util = (() => {
+  function toast(msg, tipo = "info") {
+    const el = document.getElementById("toast");
+    el.textContent = msg;
+    el.className = "toast show " + (tipo === "erro" ? "erro" : tipo === "ok" ? "ok" : "");
+    clearTimeout(el._t);
+    el._t = setTimeout(() => el.className = "toast", 3200);
+  }
+  function esc(s) {
+    return String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c]));
+  }
+  function fmtNum(n) {
+    const v = Number(n) || 0;
+    return v.toLocaleString("pt-BR", { maximumFractionDigits: 2 });
+  }
+  function fmtData(d) {
+    if (!d) return "—";
+    return String(d);
+  }
+  function agora() {
+    const d = new Date();
+    return d.toLocaleString("pt-BR", { dateStyle:"short", timeStyle:"short" });
+  }
+  function agoraISO() {
+    const d = new Date();
+    const pad = n => String(n).padStart(2,"0");
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  }
+  function gerarIdDemanda(semestre, seq) {
+    const ano = (semestre || "").split(".")[0] || new Date().getFullYear();
+    return `DEM-${ano}-${String(seq).padStart(5, "0")}`;
+  }
+  function validarEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(e||"").trim()); }
+  function mascaraTelefone(v) {
+    v = String(v||"").replace(/\D/g,"").slice(0,11);
+    if (v.length <= 10) return v.replace(/(\d{0,2})(\d{0,4})(\d{0,4}).*/, (_,a,b,c)=> a ? `(${a})${b?" "+b:""}${c?"-"+c:""}` : "");
+    return v.replace(/(\d{2})(\d{5})(\d{0,4}).*/, "($1) $2-$3");
+  }
+  function semestresDisponiveis() {
+    const anoAtual = new Date().getFullYear();
+    const out = [];
+    for (let a = anoAtual - 2; a <= anoAtual + 2; a++) {
+      out.push(`${a}.1`); out.push(`${a}.2`);
+    }
+    return out;
+  }
+  function semestreAtual() {
+    const h = new Date();
+    return `${h.getFullYear()}.${h.getMonth() < 6 ? 1 : 2}`;
+  }
+  function debounce(fn, ms) {
+    let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };
+  }
+  function parseData(str) {
+    if (!str) return null;
+    // Aceita formatos: dd/mm/yyyy hh:mm, yyyy-mm-dd, ISO
+    if (str instanceof Date) return str;
+    const s = String(str).trim();
+    // ISO
+    if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
+      const d = new Date(s);
+      return isNaN(d) ? null : d;
+    }
+    // dd/mm/yyyy
+    const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
+    if (m) {
+      const d = new Date(Number(m[3].length===2 ? "20"+m[3] : m[3]), Number(m[2])-1, Number(m[1]));
+      return isNaN(d) ? null : d;
+    }
+    const d = new Date(s);
+    return isNaN(d) ? null : d;
+  }
+  function dataKey(d) {
+    const dt = parseData(d);
+    if (!dt) return null;
+    const pad = n => String(n).padStart(2,"0");
+    return `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}`;
+  }
+  function trunc(s, n) {
+    s = String(s || "");
+    return s.length > n ? s.slice(0, n) + "…" : s;
+  }
+  return { toast, esc, fmtNum, fmtData, agora, agoraISO, gerarIdDemanda,
+           validarEmail, mascaraTelefone, semestresDisponiveis, semestreAtual,
+           debounce, parseData, dataKey, trunc };
+})();
+
+/* ============================================================
+   UI — helpers de interface
+   ============================================================ */
+const UI = (() => {
+  function atualizarBadgeAPI() {
+    const badge = document.getElementById("badge-api");
+    const txt = document.getElementById("badge-api-text");
+    if (!badge || !txt) return;
+    if (API.getFonte() === "api") {
+      badge.classList.remove("off");
+      txt.textContent = "API conectada";
+    } else if (API.getFonte() === "fallback") {
+      badge.classList.add("off");
+      txt.textContent = "Modo offline";
+    } else {
+      txt.textContent = "Conectando...";
+    }
+  }
+  function openModal(title, htmlBody) {
+    document.getElementById("modal-title").textContent = title;
+    document.getElementById("modal-body").innerHTML = htmlBody;
+    document.getElementById("modal-overlay").classList.add("show");
+  }
+  function closeModal() {
+    document.getElementById("modal-overlay").classList.remove("show");
+  }
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape") closeModal();
+  });
+  document.getElementById("modal-overlay").addEventListener("click", e => {
+    if (e.target.id === "modal-overlay") closeModal();
+  });
+  return { atualizarBadgeAPI, openModal, closeModal };
+})();
+
+/* ============================================================
+   CHARTS — SVG puro, sem dependências
+   ============================================================ */
+const Charts = (() => {
+  const CORES = ["#0b3d6b","#1565a8","#1e78c4","#4a90d9","#7bb0e3","#a8ccec",
+                 "#1e7d4a","#3ca06a","#f0a500","#e08e00","#c0392b","#d9534f"];
+
+  function cor(i) { return CORES[i % CORES.length]; }
+
+  function showTip(el, evt, html) {
+    let tip = el.querySelector(".chart-tip");
+    if (!tip) {
+      tip = document.createElement("div");
+      tip.className = "chart-tip";
+      el.appendChild(tip);
+    }
+    tip.innerHTML = html;
+    const r = el.getBoundingClientRect();
+    tip.style.left = (evt.clientX - r.left + 12) + "px";
+    tip.style.top  = (evt.clientY - r.top  + 12) + "px";
+    tip.classList.add("show");
+  }
+  function hideTip(el) {
+    const tip = el.querySelector(".chart-tip");
+    if (tip) tip.classList.remove("show");
+  }
+
+  /* Bar chart horizontal (top N) */
+  function barH(container, data, opts={}) {
+    if (!container) return;
+    const el = typeof container === "string" ? document.getElementById(container) : container;
+    if (!el) return;
+    const items = data.slice(0, opts.limit || 10);
+    if (!items.length) {
+      el.innerHTML = '<div class="empty"><span class="ico">📊</span>Sem dados para exibir.</div>';
+      return;
+    }
+    const maxV = Math.max(...items.map(i => i.value), 1);
+    const valorFmt = opts.format || (v => Util.fmtNum(v));
+    el.innerHTML = items.map((it, i) => {
+      const pct = (it.value / maxV) * 100;
+      return `
+        <div style="margin-bottom:10px" data-idx="${i}" title="${Util.esc(it.label)}: ${valorFmt(it.value)}">
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;gap:8px">
+            <span style="color:var(--cinza-700);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:70%" title="${Util.esc(it.label)}">${Util.esc(it.label)}</span>
+            <span style="color:var(--ufpb-azul-800);font-weight:600;white-space:nowrap">${valorFmt(it.value)}</span>
+          </div>
+          <div style="height:8px;background:var(--cinza-100);border-radius:4px;overflow:hidden">
+            <div style="height:100%;width:${pct}%;background:${it.color || cor(i)};border-radius:4px;transition:width .4s ease"></div>
+          </div>
+        </div>`;
+    }).join("");
+  }
+
+  /* Bar chart vertical */
+  function barV(container, data, opts={}) {
+    if (!container) return;
+    const el = typeof container === "string" ? document.getElementById(container) : container;
+    if (!el) return;
+    const items = data.slice(0, opts.limit || 12);
+    if (!items.length) {
+      el.innerHTML = '<div class="empty"><span class="ico">📊</span>Sem dados para exibir.</div>';
+      return;
+    }
+    const w = 100, h = 45;
+    const gap = 0.8;
+    const barW = (w - gap*(items.length+1)) / items.length;
+    const maxV = Math.max(...items.map(i => i.value), 1);
+    const valorFmt = opts.format || (v => Util.fmtNum(v));
+    const svgH = 320;
+    const svgW = 900;
+    let svg = `<svg viewBox="0 0 ${svgW} ${svgH}" preserveAspectRatio="xMidYMid meet" style="width:100%;height:auto;font-family:inherit">`;
+    // gridlines
+    for (let g = 0; g <= 4; g++) {
+      const y = 30 + (svgH - 80) * (g/4);
+      svg += `<line x1="50" y1="${y}" x2="${svgW-20}" y2="${y}" stroke="#e2e8f0" stroke-width="1"/>`;
+      const val = maxV * (1 - g/4);
+      svg += `<text x="45" y="${y+4}" text-anchor="end" font-size="10" fill="#94a3b8">${valorFmt(val)}</text>`;
+    }
+    const innerW = svgW - 70;
+    const innerH = svgH - 80;
+    const barWpx = innerW / items.length * 0.68;
+    const gapPx = innerW / items.length * 0.32;
+    items.forEach((it, i) => {
+      const x = 50 + i * (barWpx + gapPx) + gapPx/2;
+      const bh = (it.value / maxV) * innerH;
+      const y = 30 + innerH - bh;
+      svg += `<rect x="${x}" y="${y}" width="${barWpx}" height="${bh}" fill="${it.color || cor(i)}" rx="3"
+              data-idx="${i}" style="cursor:pointer">
+              <title>${Util.esc(it.label)}: ${valorFmt(it.value)}</title>
+              </rect>`;
+      // label rotacionada
+      svg += `<text x="${x + barWpx/2}" y="${svgH-45}" text-anchor="end" font-size="10" fill="#64748b"
+              transform="rotate(-35, ${x + barWpx/2}, ${svgH-45})">${Util.esc(Util.trunc(it.label, 22))}</text>`;
+    });
+    svg += `</svg>`;
+    el.innerHTML = svg;
+  }
+
+  /* Line chart (evolução) */
+  function line(container, points, opts={}) {
+    if (!container) return;
+    const el = typeof container === "string" ? document.getElementById(container) : container;
+    if (!el) return;
+    if (!points.length) {
+      el.innerHTML = '<div class="empty"><span class="ico">📈</span>Sem dados para exibir.</div>';
+      return;
+    }
+    const svgW = 900, svgH = 300;
+    const padL = 55, padR = 20, padT = 25, padB = 55;
+    const innerW = svgW - padL - padR;
+    const innerH = svgH - padT - padB;
+    const maxV = Math.max(...points.map(p => p.value), 1);
+    const valorFmt = opts.format || (v => Util.fmtNum(v));
+    let svg = `<svg viewBox="0 0 ${svgW} ${svgH}" preserveAspectRatio="xMidYMid meet" style="width:100%;height:auto;font-family:inherit">`;
+    // gridlines
+    for (let g = 0; g <= 4; g++) {
+      const y = padT + innerH * (g/4);
+      svg += `<line x1="${padL}" y1="${y}" x2="${svgW-padR}" y2="${y}" stroke="#e2e8f0" stroke-width="1"/>`;
+      const val = maxV * (1 - g/4);
+      svg += `<text x="${padL-8}" y="${y+4}" text-anchor="end" font-size="10" fill="#94a3b8">${valorFmt(val)}</text>`;
+    }
+    // pontos
+    const stepX = points.length > 1 ? innerW / (points.length - 1) : 0;
+    const coords = points.map((p, i) => {
+      const x = padL + i * stepX;
+      const y = padT + innerH - (p.value / maxV) * innerH;
+      return { x, y, ...p };
+    });
+    // area
+    let areaPath = `M ${coords[0].x} ${padT+innerH} `;
+    coords.forEach(c => { areaPath += `L ${c.x} ${c.y} `; });
+    areaPath += `L ${coords[coords.length-1].x} ${padT+innerH} Z`;
+    svg += `<path d="${areaPath}" fill="rgba(21,101,168,.12)"/>`;
+    // linha
+    let linePath = `M ${coords[0].x} ${coords[0].y}`;
+    coords.forEach((c,i) => { if (i>0) linePath += ` L ${c.x} ${c.y}`; });
+    svg += `<path d="${linePath}" stroke="#1565a8" stroke-width="2.5" fill="none" stroke-linejoin="round" stroke-linecap="round"/>`;
+    // pontos
+    coords.forEach(c => {
+      svg += `<circle cx="${c.x}" cy="${c.y}" r="4" fill="#fff" stroke="#1565a8" stroke-width="2">
+        <title>${Util.esc(c.label)}: ${valorFmt(c.value)}</title></circle>`;
+    });
+    // labels eixo X
+    const skip = Math.ceil(coords.length / 12);
+    coords.forEach((c,i) => {
+      if (i % skip !== 0 && i !== coords.length-1) return;
+      svg += `<text x="${c.x}" y="${svgH-30}" text-anchor="middle" font-size="10" fill="#64748b">${Util.esc(c.label)}</text>`;
+    });
+    svg += `</svg>`;
+    el.innerHTML = svg;
+  }
+
+  /* Donut chart */
+  function donut(container, segments, opts={}) {
+    if (!container) return;
+    const el = typeof container === "string" ? document.getElementById(container) : container;
+    if (!el) return;
+    const total = segments.reduce((s, x) => s + x.value, 0);
+    if (!total) {
+      el.innerHTML = '<div class="empty"><span class="ico">🍩</span>Sem dados para exibir.</div>';
+      return;
+    }
+    const size = 220, r = 80, stroke = 26, cx = size/2, cy = size/2;
+    const circ = 2 * Math.PI * r;
+    let offset = 0;
+    let svg = `<div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap;justify-content:center">
+      <svg viewBox="0 0 ${size} ${size}" style="width:${size}px;height:${size}px;flex-shrink:0;font-family:inherit">`;
+    segments.forEach((seg, i) => {
+      const frac = seg.value / total;
+      const dash = frac * circ;
+      svg += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none"
+        stroke="${seg.color || cor(i)}" stroke-width="${stroke}"
+        stroke-dasharray="${dash} ${circ - dash}"
+        stroke-dashoffset="${-offset}"
+        transform="rotate(-90 ${cx} ${cy})"
+        style="cursor:pointer"><title>${Util.esc(seg.label)}: ${Util.fmtNum(seg.value)} (${(frac*100).toFixed(1)}%)</title></circle>`;
+      offset += dash;
+    });
+    svg += `<text x="${cx}" y="${cy-4}" text-anchor="middle" font-size="13" fill="#64748b">Total</text>
+            <text x="${cx}" y="${cy+18}" text-anchor="middle" font-size="18" font-weight="700" fill="#0b3d6b">${Util.fmtNum(total)}</text>
+            </svg>`;
+    // legenda
+    svg += `<div style="flex:1;min-width:180px;display:flex;flex-direction:column;gap:8px">`;
+    segments.slice(0, 8).forEach((seg, i) => {
+      const pct = (seg.value/total*100).toFixed(1);
+      svg += `<div style="display:flex;align-items:center;gap:8px;font-size:12.5px">
+        <span style="width:10px;height:10px;border-radius:2px;background:${seg.color || cor(i)};flex-shrink:0"></span>
+        <span style="flex:1;color:var(--cinza-700);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${Util.esc(seg.label)}">${Util.esc(seg.label)}</span>
+        <span style="color:var(--cinza-500);font-weight:600">${pct}%</span>
+      </div>`;
+    });
+    svg += `</div></div>`;
+    el.innerHTML = svg;
+  }
+
+  /* Sparkline */
+  function sparkline(values, opts={}) {
+    if (!values || !values.length) return "";
+    const w = opts.w || 60, h = opts.h || 24;
+    const maxV = Math.max(...values, 1);
+    const minV = Math.min(...values, 0);
+    const range = maxV - minV || 1;
+    const step = w / Math.max(values.length-1, 1);
+    const pts = values.map((v,i) => `${i*step},${h - ((v-minV)/range)*h}`).join(" ");
+    const stroke = opts.color || "#1565a8";
+    return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" style="display:block">
+      <polyline points="${pts}" fill="none" stroke="${stroke}" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
+    </svg>`;
+  }
+
+  return { barH, barV, line, donut, sparkline, cor };
+})();
+
+/* ============================================================
+   FILTERS — estado global
+   ============================================================ */
+const Filters = (() => {
+  const state = {
+    semestre: "",
+    departamento: "",
+    setor: "",
+    grupo: "",
+    status: "",
+    dataIni: "",
+    dataFim: "",
+    busca: ""
+  };
+  const listeners = [];
+
+  function set(patch) {
+    Object.assign(state, patch);
+    emit();
+  }
+  function clear() {
+    Object.keys(state).forEach(k => state[k] = "");
+    // resetar selects
+    ["flt-semestre","flt-departamento","flt-setor","flt-status",
+     "flt-data-ini","flt-data-fim","flt-busca"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = "";
+    });
+    emit();
+  }
+  function onChange(fn) { listeners.push(fn); }
+  function emit() { listeners.forEach(fn => fn(state)); }
+  function ativos() {
+    return Object.values(state).filter(v => v !== "" && v != null).length;
+  }
+
+  function matches(d) {
+    if (state.semestre && d.semestre !== state.semestre) return false;
+    if (state.departamento && d.departamento !== state.departamento) return false;
+    if (state.setor && d.setor !== state.setor) return false;
+    if (state.status && d.status !== state.status) return false;
+
+    if (state.dataIni) {
+      const di = Util.dataKey(state.dataIni);
+      const dd = Util.dataKey(d.dataHora);
+      if (di && dd && dd < di) return false;
+    }
+    if (state.dataFim) {
+      const df = Util.dataKey(state.dataFim);
+      const dd = Util.dataKey(d.dataHora);
+      if (df && dd && dd > df) return false;
+    }
+    if (state.grupo) {
+      if (!d.itens.some(i => i.grupo === state.grupo)) return false;
+    }
+    if (state.busca) {
+      const b = state.busca.toLowerCase();
+      const hit =
+        (d.id||"").toLowerCase().includes(b) ||
+        (d.setor||"").toLowerCase().includes(b) ||
+        (d.departamento||"").toLowerCase().includes(b) ||
+        (d.responsavel||"").toLowerCase().includes(b) ||
+        (d.itens||[]).some(i =>
+          (i.codigo||"").toLowerCase().includes(b) ||
+          (i.material||"").toLowerCase().includes(b));
+      if (!hit) return false;
+    }
+    return true;
+  }
+
+  return { state, set, clear, matches, onChange, ativos };
+})();
+
+/* ============================================================
+   DATA — normalização + agregações
+   ============================================================ */
+const Data = (() => {
+  function normalizarDemanda(d) {
+    if (d.itens && Array.isArray(d.itens) && !d.itens_demanda) {
+      // já normalizado
+      return {
+        id: d.id || d.id_demanda || "",
+        dataHora: d.dataHora || d.data_hora_envio || "",
+        semestre: d.semestre || d.semestre_demanda || "",
+        departamento: d.departamento || "",
+        setor: d.setor || d.setor_demandante || "",
+        responsavel: d.responsavel || d.responsavel_administrativo_ou_tecnico || "",
+        chefia: d.chefia || d.chefia_do_setor || "",
+        telefone: d.telefone || d.whatsapp_telefone || "",
+        email: d.email || d.email_setor_ou_responsavel || "",
+        matricula: d.matricula || d.matricula_responsavel || "",
+        observacao: d.observacao || "",
+        status: d.status || "RECEBIDA",
+        itens: d.itens.map(i => ({
+          grupo: String(i.grupo || "").trim(),
+          descGrupo: String(i.descGrupo || i.descricao_grupo || "").trim(),
+          codigo: String(i.codigo || "").trim(),
+          material: String(i.material || "").trim(),
+          qtd: Number(i.qtd || 0),
+          saldoBase: Number(i.saldoBase || i.saldo || 0)
+        }))
+      };
+    }
+    // formato bruto da planilha
+    const itens = (d.itens_demanda || d.itensDemanda || d.itens || []).map(i => ({
+      grupo: String(i.grupo || i.GRUPO || "").trim(),
+      descGrupo: String(i.descGrupo || i["DESCRIÇÃO DO GRUPO"] || i.descricao_grupo || "").trim(),
+      codigo: String(i.codigo || i["CÓDIGO_MATERIAL"] || i.codigo_material || "").trim(),
+      material: String(i.material || i["MATERIAL"] || "").trim(),
+      qtd: Number(i.qtd || i["QUANTIDADE_DEMANDADA_SEMESTRAL"] || 0),
+      saldoBase: Number(i.saldoBase || i["SALDO_ESTOQUE_BASE"] || 0)
+    }));
+    return {
+      id: d.id || d.id_demanda || d["ID_DEMANDA"] || "",
+      dataHora: d.dataHora || d.data_hora_envio || d["DATA_HORA_ENVIO"] || "",
+      semestre: d.semestre || d.semestre_demanda || d["SEMESTRE_DEMANDA"] || "",
+      departamento: d.departamento || d["DEPARTAMENTO"] || "",
+      setor: d.setor || d.setor_demandante || d["SETOR_DEMANDANTE"] || "",
+      responsavel: d.responsavel || d.responsavel_administrativo_ou_tecnico || d["RESPONSÁVEL_ADMINISTRATIVO_OU_TÉCNICO"] || "",
+      chefia: d.chefia || d.chefia_do_setor || d["CHEFIA_DO_SETOR"] || "",
+      telefone: d.telefone || d.whatsapp_telefone || d["WHATSAPP_TELEFONE"] || "",
+      email: d.email || d.email_setor_ou_responsavel || d["EMAIL_SETOR_OU_RESPONSÁVEL"] || "",
+      matricula: d.matricula || d.matricula_responsavel || d["MATRÍCULA_RESPONSÁVEL"] || "",
+      observacao: d.observacao || d["OBSERVAÇÃO"] || "",
+      status: d.status || d["STATUS"] || "RECEBIDA",
+      itens
+    };
+  }
+
+  async function carregar(force=false) {
+    const raw = await API.buscarDemandas(force);
+    State.demandas = (raw || []).map(normalizarDemanda).filter(d => d.itens && d.itens.length);
+    return State.demandas;
+  }
+
+  function filtradas() {
+    return State.demandas.filter(d => Filters.matches(d));
+  }
+
+  // KPIs globais
+  function kpis(demandas) {
+    const itens = demandas.flatMap(d => d.itens);
+    return {
+      pedidos: demandas.length,
+      linhasItens: itens.length,
+      qtdTotal: itens.reduce((s,i) => s + i.qtd, 0),
+      setores: new Set(demandas.map(d => d.setor)).size,
+      departamentos: new Set(demandas.map(d => d.departamento)).size,
+      materiaisDistintos: new Set(itens.map(i => i.codigo)).size,
+      status: demandas.reduce((acc, d) => {
+        acc[d.status] = (acc[d.status] || 0) + 1; return acc;
+      }, {})
+    };
+  }
+
+  // Agregações
+  function porDepartamento(demandas) {
+    const m = new Map();
+    demandas.forEach(d => {
+      if (!m.has(d.departamento)) m.set(d.departamento, { departamento: d.departamento, pedidos: 0, linhas: 0, qtd: 0, materiais: new Set() });
+      const o = m.get(d.departamento);
+      o.pedidos++;
+      d.itens.forEach(i => { o.linhas++; o.qtd += i.qtd; o.materiais.add(i.codigo); });
+    });
+    return [...m.values()].map(o => ({ ...o, materiais: o.materiais.size }))
+                          .sort((a,b) => b.qtd - a.qtd);
+  }
+
+  function porSetor(demandas) {
+    const m = new Map();
+    demandas.forEach(d => {
+      const k = d.departamento + "||" + d.setor;
+      if (!m.has(k)) m.set(k, { departamento: d.departamento, setor: d.setor, pedidos: 0, linhas: 0, qtd: 0, materiais: new Set() });
+      const o = m.get(k);
+      o.pedidos++;
+      d.itens.forEach(i => { o.linhas++; o.qtd += i.qtd; o.materiais.add(i.codigo); });
+    });
+    return [...m.values()].map(o => ({ ...o, materiais: o.materiais.size }))
+                          .sort((a,b) => b.qtd - a.qtd);
+  }
+
+  function porMaterial(demandas) {
+    const m = new Map();
+    demandas.forEach(d => {
+      d.itens.forEach(i => {
+        if (!m.has(i.codigo)) m.set(i.codigo, {
+          codigo: i.codigo, material: i.material, grupo: i.grupo,
+          descGrupo: i.descGrupo, qtd: 0, pedidos: new Set(),
+          setores: new Set(), departamentos: new Set()
+        });
+        const o = m.get(i.codigo);
+        o.qtd += i.qtd;
+        o.pedidos.add(d.id);
+        o.setores.add(d.setor);
+        o.departamentos.add(d.departamento);
+      });
+    });
+    return [...m.values()].map(o => ({
+      ...o,
+      pedidos: o.pedidos.size,
+      setores: [...o.setores].sort(),
+      departamentos: [...o.departamentos].sort()
+    })).sort((a,b) => b.qtd - a.qtd);
+  }
+
+  function porGrupo(demandas) {
+    const m = new Map();
+    demandas.forEach(d => {
+      d.itens.forEach(i => {
+        if (!m.has(i.grupo)) m.set(i.grupo, { grupo: i.grupo, desc: i.descGrupo, materiais: new Set(), qtd: 0 });
+        const o = m.get(i.grupo);
+        o.materiais.add(i.codigo);
+        o.qtd += i.qtd;
+      });
+    });
+    return [...m.values()].map(o => ({ ...o, materiais: o.materiais.size }))
+                          .sort((a,b) => b.qtd - a.qtd);
+  }
+
+  function porStatus(demandas) {
+    const m = new Map();
+    demandas.forEach(d => {
+      if (!m.has(d.status)) m.set(d.status, { label: d.status, value: 0 });
+      m.get(d.status).value++;
+    });
+    return [...m.values()].sort((a,b) => b.value - a.value);
+  }
+
+  function evolucaoMensal(demandas) {
+    const m = new Map();
+    demandas.forEach(d => {
+      const dt = Util.parseData(d.dataHora);
+      if (!dt) return;
+      const k = `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,"0")}`;
+      if (!m.has(k)) m.set(k, { label: k, value: 0 });
+      m.get(k).value++;
+    });
+    return [...m.values()].sort((a,b) => a.label.localeCompare(b.label));
+  }
+
+  function evolucaoSemestre(demandas) {
+    const m = new Map();
+    demandas.forEach(d => {
+      if (!m.has(d.semestre)) m.set(d.semestre, { label: d.semestre, value: 0 });
+      m.get(d.semestre).value++;
+    });
+    return [...m.values()].sort((a,b) => a.label.localeCompare(b.label));
+  }
+
+  return {
+    carregar, filtradas, normalizarDemanda, kpis,
+    porDepartamento, porSetor, porMaterial, porGrupo, porStatus,
+    evolucaoMensal, evolucaoSemestre
+  };
+})();
+
+/* ============================================================
+   DASHBOARD
+   ============================================================ */
+const Dashboard = (() => {
+  async function render() {
+    // skeleton
+    document.getElementById("dash-kpis").innerHTML = Array(6).fill(0).map(() =>
+      `<div class="kpi"><div class="skeleton" style="height:12px;width:60%"></div>
+       <div class="skeleton" style="height:28px;width:80%;margin-top:10px"></div></div>`).join("");
+
+    const demandas = Data.filtradas();
+    const k = Data.kpis(demandas);
+
+    // KPIs
+    const kpis = [
+      { label: "Pedidos recebidos", value: Util.fmtNum(k.pedidos), sub: "no período filtrado", accent: "accent-azul" },
+      { label: "Linhas de itens", value: Util.fmtNum(k.linhasItens), sub: "itens individuais", accent: "accent-azul" },
+      { label: "Qtd total demandada", value: Util.fmtNum(k.qtdTotal), sub: "unidades", accent: "accent-verde" },
+      { label: "Materiais distintos", value: Util.fmtNum(k.materiaisDistintos), sub: "códigos únicos", accent: "accent-ambar" },
+      { label: "Setores ativos", value: Util.fmtNum(k.setores), sub: "com pedidos", accent: "accent-azul" },
+      { label: "Departamentos ativos", value: Util.fmtNum(k.departamentos), sub: "de 8 cadastrados", accent: "accent-vermelho" }
+    ];
+    document.getElementById("dash-kpis").innerHTML = kpis.map(kp => `
+      <div class="kpi ${kp.accent}">
+        <div class="kpi-label">${Util.esc(kp.label)}</div>
+        <div class="kpi-value">${kp.value}</div>
+        <div class="kpi-sub">${Util.esc(kp.sub)}</div>
+      </div>`).join("");
+
+    // Evolução
+    const evo = Data.evolucaoMensal(demandas);
+    Charts.line("chart-evolucao", evo.length ? evo : [], { format: v => Util.fmtNum(v) + " ped." });
+
+    // Departamentos (bar horizontal)
+    const dep = Data.porDepartamento(demandas);
+    Charts.barH("chart-departamentos", dep.map(d => ({
+      label: d.departamento,
+      value: d.qtd
+    })), { limit: 8 });
+
+    // Top materiais
+    const mat = Data.porMaterial(demandas).slice(0, 10);
+    Charts.barH("chart-top-materiais", mat.map(m => ({
+      label: m.material,
+      value: m.qtd
+    })), { limit: 10 });
+
+    // Top setores
+    const set = Data.porSetor(demandas).slice(0, 10);
+    Charts.barH("chart-top-setores", set.map(s => ({
+      label: s.setor,
+      value: s.qtd
+    })), { limit: 10 });
+
+    // Últimos pedidos
+    const ult = [...demandas].sort((a,b) => {
+      const da = Util.parseData(a.dataHora) || new Date(0);
+      const db = Util.parseData(b.dataHora) || new Date(0);
+      return db - da;
+    }).slice(0, 8);
+
+    const tbody = document.querySelector("#dash-ultimos tbody");
+    tbody.innerHTML = ult.length ? ult.map(d => {
+      const total = d.itens.reduce((s,i) => s+i.qtd, 0);
+      return `<tr>
+        <td class="mono"><b>${Util.esc(d.id)}</b></td>
+        <td>${Util.esc(d.dataHora || "—")}</td>
+        <td>${Util.esc(d.semestre || "—")}</td>
+        <td class="trunc" title="${Util.esc(d.departamento)}">${Util.esc(d.departamento)}</td>
+        <td class="trunc" title="${Util.esc(d.setor)}">${Util.esc(d.setor)}</td>
+        <td class="num">${d.itens.length}</td>
+        <td class="num"><b>${Util.fmtNum(total)}</b></td>
+        <td><span class="badge">${Util.esc(d.status)}</span></td>
+      </tr>`;
+    }).join("") : '<tr><td colspan="8" class="empty">Nenhum pedido recebido ainda.</td></tr>';
+  }
+  return { render };
+})();
+
+/* ============================================================
+   PEDIDOS TABLE — com paginação, busca, ordenação
+   ============================================================ */
+const PedidosTable = (() => {
+  let _sort = { key: "dataHora", dir: "desc" };
+  let _page = 1;
+  let _perPage = 25;
+
+  function computeRows() {
+    const demandas = Data.filtradas();
+    return demandas.map(d => ({
+      id: d.id,
+      dataHora: d.dataHora,
+      semestre: d.semestre,
+      departamento: d.departamento,
+      setor: d.setor,
+      status: d.status,
+      itensCount: d.itens.length,
+      totalQtd: d.itens.reduce((s,i) => s+i.qtd, 0),
+      _raw: d
+    }));
+  }
+
+  function sortRows(rows) {
+    const { key, dir } = _sort;
+    const mul = dir === "asc" ? 1 : -1;
+    return [...rows].sort((a, b) => {
+      let va = a[key], vb = b[key];
+      if (key === "dataHora") {
+        va = Util.parseData(va)?.getTime() || 0;
+        vb = Util.parseData(vb)?.getTime() || 0;
+      }
+      if (typeof va === "number" && typeof vb === "number") return (va - vb) * mul;
+      return String(va||"").localeCompare(String(vb||""), "pt-BR") * mul;
+    });
+  }
+
+  function render() {
+    const rows = sortRows(computeRows());
+    const total = rows.length;
+    const totalPages = Math.max(1, Math.ceil(total / _perPage));
+    if (_page > totalPages) _page = totalPages;
+    const start = (_page - 1) * _perPage;
+    const pageRows = rows.slice(start, start + _perPage);
+
+    document.getElementById("pedidos-total").textContent = `${total} pedido${total===1?"":"s"}`;
+    document.getElementById("filtros-count-pedidos").textContent = Filters.ativos();
+
+    const tbody = document.querySelector("#tbl-pedidos tbody");
+    if (!pageRows.length) {
+      tbody.innerHTML = '<tr><td colspan="9" class="empty">Nenhum pedido encontrado com os filtros atuais.</td></tr>';
+    } else {
+      tbody.innerHTML = pageRows.map(r => `
+        <tr>
+          <td class="mono"><b>${Util.esc(r.id)}</b></td>
+          <td>${Util.esc(r.dataHora || "—")}</td>
+          <td>${Util.esc(r.semestre || "—")}</td>
+          <td class="trunc" title="${Util.esc(r.departamento)}">${Util.esc(r.departamento)}</td>
+          <td class="trunc" title="${Util.esc(r.setor)}">${Util.esc(r.setor)}</td>
+          <td class="num">${r.itensCount}</td>
+          <td class="num"><b>${Util.fmtNum(r.totalQtd)}</b></td>
+          <td><span class="badge">${Util.esc(r.status)}</span></td>
+          <td><button class="btn btn-outline btn-xs" onclick="PedidosTable.verDetalhes('${Util.esc(r.id).replace(/'/g,"\\'")}')">Detalhes</button></td>
+        </tr>`).join("");
+    }
+
+    // Paginação
+    renderPagination(total, totalPages);
+    // Ordenação visual
+    document.querySelectorAll("#tbl-pedidos th.sortable").forEach(th => {
+      th.classList.toggle("sorted", th.dataset.sort === _sort.key);
+      const ind = th.querySelector(".sort-ind");
+      if (ind) ind.textContent = th.dataset.sort === _sort.key ? (_sort.dir === "asc" ? "↑" : "↓") : "↕";
+    });
+  }
+
+  function renderPagination(total, totalPages) {
+    const el = document.getElementById("pedidos-pagination");
+    const start = total === 0 ? 0 : (_page-1)*_perPage + 1;
+    const end = Math.min(_page*_perPage, total);
+
+    let btns = "";
+    const maxBtns = 7;
+    let from = Math.max(1, _page - 3);
+    let to = Math.min(totalPages, from + maxBtns - 1);
+    if (to - from < maxBtns - 1) from = Math.max(1, to - maxBtns + 1);
+
+    if (from > 1) btns += `<button onclick="PedidosTable.goPage(1)">1</button><span style="padding:0 4px;color:var(--cinza-400)">…</span>`;
+    for (let i = from; i <= to; i++) {
+      btns += `<button class="${i===_page?"active":""}" onclick="PedidosTable.goPage(${i})">${i}</button>`;
+    }
+    if (to < totalPages) btns += `<span style="padding:0 4px;color:var(--cinza-400)">…</span><button onclick="PedidosTable.goPage(${totalPages})">${totalPages}</button>`;
+
+    el.innerHTML = `
+      <div class="pg-info">Mostrando <b>${start}–${end}</b> de <b>${total}</b> pedidos</div>
+      <div class="pg-controls">
+        <button ${_page===1?"disabled":""} onclick="PedidosTable.goPage(${_page-1})">←</button>
+        ${btns}
+        <button ${_page===totalPages?"disabled":""} onclick="PedidosTable.goPage(${_page+1})">→</button>
+      </div>`;
+  }
+
+  function goPage(p) {
+    const rows = computeRows();
+    const tp = Math.max(1, Math.ceil(rows.length / _perPage));
+    _page = Math.max(1, Math.min(p, tp));
+    render();
+    document.querySelector("#tbl-pedidos")?.scrollIntoView({behavior:"smooth", block:"start"});
+  }
+
+  function verDetalhes(id) {
+    const d = State.demandas.find(x => x.id === id);
+    if (!d) { Util.toast("Pedido não encontrado.", "erro"); return; }
+    const total = d.itens.reduce((s,i) => s+i.qtd, 0);
+    const html = `
+      <div class="detail-grid">
+        <div class="detail-item"><div class="k">ID</div><div class="v">${Util.esc(d.id)}</div></div>
+        <div class="detail-item"><div class="k">Data/Hora</div><div class="v">${Util.esc(d.dataHora || "—")}</div></div>
+        <div class="detail-item"><div class="k">Semestre</div><div class="v">${Util.esc(d.semestre)}</div></div>
+        <div class="detail-item"><div class="k">Status</div><div class="v"><span class="badge">${Util.esc(d.status)}</span></div></div>
+        <div class="detail-item"><div class="k">Departamento</div><div class="v">${Util.esc(d.departamento)}</div></div>
+        <div class="detail-item"><div class="k">Setor</div><div class="v">${Util.esc(d.setor)}</div></div>
+        <div class="detail-item"><div class="k">Responsável</div><div class="v">${Util.esc(d.responsavel)}</div></div>
+        <div class="detail-item"><div class="k">Chefia</div><div class="v">${Util.esc(d.chefia)}</div></div>
+        <div class="detail-item"><div class="k">Telefone</div><div class="v">${Util.esc(d.telefone)}</div></div>
+        <div class="detail-item"><div class="k">E-mail</div><div class="v">${Util.esc(d.email)}</div></div>
+        <div class="detail-item"><div class="k">Matrícula</div><div class="v">${Util.esc(d.matricula)}</div></div>
+        <div class="detail-item"><div class="k">Total demandado</div><div class="v">${Util.fmtNum(total)} unidades</div></div>
+      </div>
+      ${d.observacao ? `<div class="alert alert-info"><span>ℹ️</span><div><b>Observação:</b> ${Util.esc(d.observacao)}</div></div>` : ""}
+      <div class="table-wrap" style="max-height:400px;overflow-y:auto">
+        <table>
+          <thead><tr><th>Código</th><th>Material</th><th>Grupo</th><th class="num">Saldo</th><th class="num">Qtd</th></tr></thead>
+          <tbody>
+            ${d.itens.map(i => `<tr>
+              <td class="mono">${Util.esc(i.codigo)}</td>
+              <td>${Util.esc(i.material)}</td>
+              <td>${Util.esc(i.descGrupo)}</td>
+              <td class="num">${Util.fmtNum(i.saldoBase)}</td>
+              <td class="num"><b>${Util.fmtNum(i.qtd)}</b></td>
+            </tr>`).join("")}
+          </tbody>
+        </table>
+      </div>`;
+    UI.openModal("Pedido " + d.id, html);
+  }
+
+  function exportCSV() {
+    const rows = sortRows(computeRows());
+    const header = ["ID","Data/Hora","Semestre","Departamento","Setor","Responsável","Chefia","Telefone","Email","Matrícula","Status","Itens","Qtd Total","Código","Material","Grupo","Qtd Item"];
+    const linhas = [header];
+    rows.forEach(r => {
+      const d = r._raw;
+      d.itens.forEach(i => {
+        linhas.push([
+          d.id, d.dataHora, d.semestre, d.departamento, d.setor,
+          d.responsavel, d.chefia, d.telefone, d.email, d.matricula,
+          d.status, d.itens.length, r.totalQtd,
+          i.codigo, i.material, i.descGrupo, i.qtd
+        ]);
+      });
+    });
+    downloadCSV(linhas, `pedidos_${Util.agoraISO()}.csv`);
+  }
+
+  function bindSort() {
+    document.querySelectorAll("#tbl-pedidos th.sortable").forEach(th => {
+      th.addEventListener("click", () => {
+        const k = th.dataset.sort;
+        if (_sort.key === k) _sort.dir = _sort.dir === "asc" ? "desc" : "asc";
+        else { _sort.key = k; _sort.dir = "asc"; }
+        _page = 1;
+        render();
+      });
+    });
+  }
+
+  function init() { bindSort(); }
+  return { render, goPage, verDetalhes, exportCSV, init };
+})();
+
+/* ============================================================
+   DEPARTAMENTOS VIEW
+   ============================================================ */
+const Departamentos = (() => {
+  function render() {
+    const demandas = Data.filtradas();
+    const dados = Data.porDepartamento(demandas);
+    const totalGeral = dados.reduce((s,d) => s + d.qtd, 0);
+
+    document.getElementById("deps-total").textContent = `${dados.length} departamento${dados.length===1?"":"s"}`;
+
+    Charts.barV("chart-deps-analise", dados.slice(0, 12).map(d => ({
+      label: d.departamento.replace(/^Departamento de /, "Depto. ").replace(/ - .*$/, ""),
+      value: d.qtd
+    })));
+
+    const tbody = document.querySelector("#tbl-departamentos tbody");
+    if (!dados.length) {
+      tbody.innerHTML = '<tr><td colspan="7" class="empty">Sem dados.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = dados.map(d => {
+      const pct = totalGeral ? (d.qtd/totalGeral*100).toFixed(1) : 0;
+      return `<tr>
+        <td>${Util.esc(d.departamento)}</td>
+        <td class="num">${d.pedidos}</td>
+        <td class="num">${d.linhas}</td>
+        <td class="num"><b>${Util.fmtNum(d.qtd)}</b></td>
+        <td class="num">${pct}%</td>
+        <td class="num">${d.materiais}</td>
+        <td><button class="btn btn-outline btn-xs" onclick="Departamentos.drillDown('${Util.esc(d.departamento).replace(/'/g,"\\'")}')">Ver setores</button></td>
+      </tr>`;
+    }).join("") + `<tr style="background:var(--ufpb-azul-50);font-weight:700">
+      <td>TOTAL</td>
+      <td class="num">${dados.reduce((s,d)=>s+d.pedidos,0)}</td>
+      <td class="num">${dados.reduce((s,d)=>s+d.linhas,0)}</td>
+      <td class="num">${Util.fmtNum(totalGeral)}</td>
+      <td class="num">100%</td>
+      <td class="num">—</td>
+      <td></td>
+    </tr>`;
+  }
+
+  function drillDown(dep) {
+    // Vai para view Setores filtrado por departamento
+    App.go("setores");
+    const sel = document.getElementById("flt-setor-dep");
+    if (sel) { sel.value = dep; }
+    Setores.render();
+  }
+
+  return { render, drillDown };
+})();
+
+/* ============================================================
+   SETORES VIEW
+   ============================================================ */
+const Setores = (() => {
+  function render() {
+    const depFiltro = document.getElementById("flt-setor-dep")?.value || "";
+    const semFiltro = document.getElementById("flt-setor-sem")?.value || "";
+    let demandas = Data.filtradas();
+    if (depFiltro) demandas = demandas.filter(d => d.departamento === depFiltro);
+    if (semFiltro) demandas = demandas.filter(d => d.semestre === semFiltro);
+
+    const dados = Data.porSetor(demandas);
+
+    Charts.barV("chart-setores-analise", dados.slice(0, 15).map(s => ({
+      label: s.setor,
+      value: s.qtd
+    })));
+
+    const tbody = document.querySelector("#tbl-setores tbody");
+    if (!dados.length) {
+      tbody.innerHTML = '<tr><td colspan="6" class="empty">Sem dados.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = dados.map(s => `<tr>
+      <td class="trunc" title="${Util.esc(s.departamento)}">${Util.esc(s.departamento)}</td>
+      <td>${Util.esc(s.setor)}</td>
+      <td class="num">${s.pedidos}</td>
+      <td class="num">${s.linhas}</td>
+      <td class="num"><b>${Util.fmtNum(s.qtd)}</b></td>
+      <td class="num">${s.materiais}</td>
+    </tr>`).join("");
+  }
+
+  function populateSelects() {
+    const selDep = document.getElementById("flt-setor-dep");
+    if (selDep && selDep.options.length <= 1) {
+      API.getDepartamentos().forEach(d => {
+        const o = document.createElement("option"); o.value=d; o.textContent=d; selDep.appendChild(o);
+      });
+    }
+    const selSem = document.getElementById("flt-setor-sem");
+    if (selSem && selSem.options.length <= 1) {
+      Util.semestresDisponiveis().forEach(s => {
+        const o = document.createElement("option"); o.value=s; o.textContent=s; selSem.appendChild(o);
+      });
+    }
+  }
+
+  return { render, populateSelects };
+})();
+
+/* ============================================================
+   CONSOLIDAÇÃO VIEW
+   ============================================================ */
+const Consolidacao = (() => {
+  let _dados = [];
+
+  function render() {
+    const grupoFiltro = document.getElementById("flt-cons-grupo")?.value || "";
+    const busca = (document.getElementById("flt-cons-busca")?.value || "").toLowerCase();
+
+    let demandas = Data.filtradas();
+    let materiais = Data.porMaterial(demandas);
+
+    if (grupoFiltro) materiais = materiais.filter(m => m.grupo === grupoFiltro);
+    if (busca) materiais = materiais.filter(m =>
+      m.material.toLowerCase().includes(busca) || m.codigo.toLowerCase().includes(busca));
+
+    _dados = materiais;
+    document.getElementById("cons-count").textContent = Filters.ativos();
+    document.getElementById("cons-total-materiais").textContent = `${materiais.length} materiais`;
+
+    const tbody = document.querySelector("#tbl-consolidacao tbody");
+    if (!materiais.length) {
+      tbody.innerHTML = '<tr><td colspan="7" class="empty">Nenhum material encontrado.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = materiais.slice(0, 500).map(m => `<tr>
+      <td class="mono">${Util.esc(m.codigo)}</td>
+      <td class="trunc" title="${Util.esc(m.material)}">${Util.esc(m.material)}</td>
+      <td class="trunc" title="${Util.esc(m.descGrupo)}">${Util.esc(m.descGrupo)}</td>
+      <td class="num"><b>${Util.fmtNum(m.qtd)}</b></td>
+      <td class="num">${m.pedidos}</td>
+      <td class="trunc" title="${Util.esc(m.setores.join(', '))}">${Util.esc(m.setores.slice(0,3).join(", ") + (m.setores.length>3?` +${m.setores.length-3}`:""))}</td>
+      <td class="trunc" title="${Util.esc(m.departamentos.join(', '))}">${Util.esc(m.departamentos.slice(0,2).join(", ") + (m.departamentos.length>2?` +${m.departamentos.length-2}`:""))}</td>
+    </tr>`).join("") + (materiais.length > 500 ? `<tr><td colspan="7" class="empty">Exibindo 500 de ${materiais.length} materiais. Refine os filtros para ver mais.</td></tr>` : "");
+  }
+
+  function exportCSV() {
+    if (!_dados.length) { Util.toast("Nada para exportar.", "erro"); return; }
+    const linhas = [["Código","Material","Grupo","Qtd Total","Nº Pedidos","Setores","Departamentos"]];
+    _dados.forEach(m => {
+      linhas.push([m.codigo, m.material, m.descGrupo, m.qtd, m.pedidos,
+        m.setores.join("; "), m.departamentos.join("; ")]);
+    });
+    downloadCSV(linhas, `consolidacao_${Util.agoraISO()}.csv`);
+  }
+
+  function populateGrupos() {
+    const sel = document.getElementById("flt-cons-grupo");
+    if (!sel || sel.options.length > 1) return;
+    API.carregarMateriais().then(mats => {
+      const grupos = [...new Map(mats.map(m=>[m.grupo,m])).values()]
+        .sort((a,b)=>a.grupo.localeCompare(b.grupo));
+      grupos.forEach(g => {
+        const o = document.createElement("option");
+        o.value = g.grupo;
+        o.textContent = `${g.grupo} — ${g.descGrupo}`;
+        sel.appendChild(o);
+      });
+    });
+  }
+
+  return { render, exportCSV, populateGrupos };
+})();
+
+/* ============================================================
+   RELATÓRIOS
+   ============================================================ */
+const Relatorios = (() => {
+
+  function filtrarDemandas(opts) {
+    let demandas = Data.filtradas(); // respeita filtros ativos
+    if (opts.tipo === "departamento" && opts.departamento) {
+      demandas = demandas.filter(d => d.departamento === opts.departamento);
+    }
+    if (opts.tipo === "setor" && opts.setor) {
+      demandas = demandas.filter(d => d.setor === opts.setor);
+    }
+    if (opts.tipo === "periodo") {
+      if (opts.dataIni) {
+        const di = Util.dataKey(opts.dataIni);
+        demandas = demandas.filter(d => {
+          const dd = Util.dataKey(d.dataHora);
+          return dd && dd >= di;
+        });
+      }
+      if (opts.dataFim) {
+        const df = Util.dataKey(opts.dataFim);
+        demandas = demandas.filter(d => {
+          const dd = Util.dataKey(d.dataHora);
+          return dd && dd <= df;
+        });
+      }
+    }
+    if (opts.semestre) demandas = demandas.filter(d => d.semestre === opts.semestre);
+    return demandas;
+  }
+
+  function gerar(formato, override={}) {
+    const tipoSel = override.tipo || document.getElementById("rep-tipo")?.value || "geral";
+    const opts = {
+      tipo: tipoSel,
+      departamento: document.getElementById("rep-dep")?.value || "",
+      setor: document.getElementById("rep-setor")?.value || "",
+      semestre: document.getElementById("rep-sem")?.value || "",
+      dataIni: document.getElementById("rep-data-ini")?.value || "",
+      dataFim: document.getElementById("rep-data-fim")?.value || ""
+    };
+    const demandas = filtrarDemandas(opts);
+    if (!demandas.length) {
+      Util.toast("Nenhum dado para o relatório com os filtros selecionados.", "erro");
+      return;
+    }
+    if (formato === "pdf") return gerarPDF(demandas, opts);
+    if (formato === "csv") return gerarCSVFile(demandas, opts);
+    if (formato === "xls") return gerarXLS(demandas, opts);
+  }
+
+  function filtrosDescricao(opts) {
+    const partes = [];
+    if (Filters.ativos() > 0) partes.push(`Filtros ativos: ${Object.entries(Filters.state).filter(([k,v])=>v).map(([k,v])=>`${k}=${v}`).join(", ")}`);
+    if (opts.departamento) partes.push(`Departamento: ${opts.departamento}`);
+    if (opts.setor) partes.push(`Setor: ${opts.setor}`);
+    if (opts.semestre) partes.push(`Semestre: ${opts.semestre}`);
+    if (opts.dataIni) partes.push(`De: ${opts.dataIni}`);
+    if (opts.dataFim) partes.push(`Até: ${opts.dataFim}`);
+    return partes.length ? partes.join(" · ") : "Nenhum filtro aplicado";
+  }
+
+  function gerarPDF(demandas, opts) {
+    const k = Data.kpis(demandas);
+    const dep = Data.porDepartamento(demandas);
+    const set = Data.porSetor(demandas);
+    const mat = Data.porMaterial(demandas).slice(0, 30);
+
+    const w = window.open("", "_blank");
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8">
+      <title>Relatório de Demandas — CT/UFPB</title>
+      <style>
+        *{box-sizing:border-box}
+        body{font-family:-apple-system,"Segoe UI",Arial,sans-serif;padding:28px;color:#0f172a;font-size:12px;line-height:1.5}
+        h1{color:#0b3d6b;font-size:19px;margin:0 0 4px;border-bottom:2px solid #0b3d6b;padding-bottom:8px}
+        h2{color:#0b3d6b;font-size:14px;margin:22px 0 8px;border-bottom:1px solid #cbd5e1;padding-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+        .meta{color:#64748b;font-size:11px;margin-bottom:14px}
+        .filtros{background:#f5f9fd;border-left:3px solid #1565a8;padding:8px 12px;border-radius:4px;margin-bottom:16px;font-size:11px;color:#0b3d6b}
+        .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+        .kpi{border:1px solid #e2e8f0;border-radius:6px;padding:10px 12px}
+        .kpi .lbl{font-size:9.5px;text-transform:uppercase;letter-spacing:.4px;color:#64748b;font-weight:600}
+        .kpi .val{font-size:17px;font-weight:700;color:#0b3d6b;margin-top:3px}
+        table{width:100%;border-collapse:collapse;font-size:10.5px;margin-bottom:10px}
+        th{background:#e8f1f9;color:#0b3d6b;text-align:left;padding:6px 8px;border:1px solid #cbd5e1;font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.3px}
+        td{padding:5px 8px;border:1px solid #e2e8f0;vertical-align:top}
+        td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+        tr:nth-child(even) td{background:#fafbfc}
+        tfoot td{background:#e8f1f9;font-weight:700;color:#0b3d6b}
+        .rodape{margin-top:26px;padding-top:12px;border-top:1px solid #e2e8f0;text-align:center;font-size:10px;color:#64748b}
+        @page{size:A4;margin:14mm}
+        @media print{.no-print{display:none}}
+        .btn-print{background:#0b3d6b;color:#fff;border:none;padding:9px 18px;border-radius:5px;font-weight:600;cursor:pointer;font-size:12px}
+      </style></head><body>
+      <div class="no-print" style="text-align:right;margin-bottom:12px">
+        <button class="btn-print" onclick="window.print()">🖨️ Imprimir / Salvar como PDF</button>
+      </div>
+      <h1>Relatório de Demandas de Aquisição — CT/UFPB</h1>
+      <div class="meta">
+        <b>Tipo:</b> ${Util.esc(opts.tipo)} &nbsp;|&nbsp;
+        <b>Gerado em:</b> ${Util.agora()} &nbsp;|&nbsp;
+        <b>Total de pedidos:</b> ${k.pedidos}
+      </div>
+      <div class="filtros"><b>Filtros aplicados:</b> ${Util.esc(filtrosDescricao(opts))}</div>
+
+      <h2>Resumo Executivo</h2>
+      <div class="kpis">
+        <div class="kpi"><div class="lbl">Pedidos</div><div class="val">${k.pedidos}</div></div>
+        <div class="kpi"><div class="lbl">Linhas de itens</div><div class="val">${k.linhasItens}</div></div>
+        <div class="kpi"><div class="lbl">Qtd total</div><div class="val">${Util.fmtNum(k.qtdTotal)}</div></div>
+        <div class="kpi"><div class="lbl">Materiais distintos</div><div class="val">${k.materiaisDistintos}</div></div>
+        <div class="kpi"><div class="lbl">Setores</div><div class="val">${k.setores}</div></div>
+        <div class="kpi"><div class="lbl">Departamentos</div><div class="val">${k.departamentos}</div></div>
+        <div class="kpi"><div class="lbl">Pedidos (mín.)</div><div class="val">${k.pedidos}</div></div>
+        <div class="kpi"><div class="lbl">Semestre ref.</div><div class="val">${Util.esc(opts.semestre || "Todos")}</div></div>
+      </div>
+
+      <h2>Demanda por Departamento</h2>
+      <table>
+        <thead><tr><th>Departamento</th><th class="num">Pedidos</th><th class="num">Linhas</th><th class="num">Qtd Total</th><th class="num">%</th><th class="num">Materiais Distintos</th></tr></thead>
+        <tbody>
+          ${dep.map(d => `<tr>
+            <td>${Util.esc(d.departamento)}</td>
+            <td class="num">${d.pedidos}</td>
+            <td class="num">${d.linhas}</td>
+            <td class="num">${Util.fmtNum(d.qtd)}</td>
+            <td class="num">${k.qtdTotal ? (d.qtd/k.qtdTotal*100).toFixed(1) : 0}%</td>
+            <td class="num">${d.materiais}</td>
+          </tr>`).join("")}
+        </tbody>
+        <tfoot><tr>
+          <td>TOTAL</td>
+          <td class="num">${dep.reduce((s,d)=>s+d.pedidos,0)}</td>
+          <td class="num">${dep.reduce((s,d)=>s+d.linhas,0)}</td>
+          <td class="num">${Util.fmtNum(k.qtdTotal)}</td>
+          <td class="num">100%</td>
+          <td class="num">—</td>
+        </tr></tfoot>
+      </table>
+
+      <h2>Demanda por Setor (Top 20)</h2>
+      <table>
+        <thead><tr><th>Departamento</th><th>Setor</th><th class="num">Pedidos</th><th class="num">Linhas</th><th class="num">Qtd</th></tr></thead>
+        <tbody>
+          ${set.slice(0,20).map(s => `<tr>
+            <td>${Util.esc(s.departamento)}</td>
+            <td>${Util.esc(s.setor)}</td>
+            <td class="num">${s.pedidos}</td>
+            <td class="num">${s.linhas}</td>
+            <td class="num">${Util.fmtNum(s.qtd)}</td>
+          </tr>`).join("")}
+        </tbody>
+      </table>
+
+      <h2>Materiais Mais Demandados (Top 30)</h2>
+      <table>
+        <thead><tr><th>Código</th><th>Material</th><th>Grupo</th><th class="num">Qtd Total</th><th class="num">Nº Pedidos</th></tr></thead>
+        <tbody>
+          ${mat.map(m => `<tr>
+            <td>${Util.esc(m.codigo)}</td>
+            <td>${Util.esc(m.material)}</td>
+            <td>${Util.esc(m.descGrupo)}</td>
+            <td class="num">${Util.fmtNum(m.qtd)}</td>
+            <td class="num">${m.pedidos}</td>
+          </tr>`).join("")}
+        </tbody>
+      </table>
+
+      <h2>Detalhamento dos Pedidos</h2>
+      <table>
+        <thead><tr><th>ID</th><th>Data/Hora</th><th>Semestre</th><th>Departamento</th><th>Setor</th><th class="num">Itens</th><th class="num">Qtd</th><th>Status</th></tr></thead>
+        <tbody>
+          ${demandas.map(d => `<tr>
+            <td>${Util.esc(d.id)}</td>
+            <td>${Util.esc(d.dataHora || "—")}</td>
+            <td>${Util.esc(d.semestre)}</td>
+            <td>${Util.esc(d.departamento)}</td>
+            <td>${Util.esc(d.setor)}</td>
+            <td class="num">${d.itens.length}</td>
+            <td class="num">${Util.fmtNum(d.itens.reduce((s,i)=>s+i.qtd,0))}</td>
+            <td>${Util.esc(d.status)}</td>
+          </tr>`).join("")}
+        </tbody>
+        <tfoot><tr>
+          <td colspan="5">TOTAL GERAL</td>
+          <td class="num">${k.linhasItens}</td>
+          <td class="num">${Util.fmtNum(k.qtdTotal)}</td>
+          <td></td>
+        </tr></tfoot>
+      </table>
+
+      <div class="rodape">
+        Documento gerado automaticamente pelo Sistema de Gestão de Demandas — CT/UFPB<br>
+        ${Util.agora()} · ${demandas.length} pedido(s) no relatório
+      </div>
+      </body></html>`);
+    w.document.close();
+    setTimeout(() => w.print(), 500);
+    Util.toast("Relatório PDF gerado.", "ok");
+  }
+
+  function gerarCSVFile(demandas, opts) {
+    const k = Data.kpis(demandas);
+    const linhas = [];
+    linhas.push(["RELATÓRIO DE DEMANDAS — CT/UFPB"]);
+    linhas.push([`Tipo: ${opts.tipo}`]);
+    linhas.push([`Gerado em: ${Util.agora()}`]);
+    linhas.push([`Filtros: ${filtrosDescricao(opts)}`]);
+    linhas.push([]);
+    linhas.push(["RESUMO"]);
+    linhas.push(["Pedidos", k.pedidos]);
+    linhas.push(["Linhas de itens", k.linhasItens]);
+    linhas.push(["Qtd total", k.qtdTotal]);
+    linhas.push(["Materiais distintos", k.materiaisDistintos]);
+    linhas.push(["Setores", k.setores]);
+    linhas.push(["Departamentos", k.departamentos]);
+    linhas.push([]);
+    linhas.push(["DEPARTAMENTO","PEDIDOS","LINHAS","QTD TOTAL","MATERIAIS DISTINTOS"]);
+    Data.porDepartamento(demandas).forEach(d => {
+      linhas.push([d.departamento, d.pedidos, d.linhas, d.qtd, d.materiais]);
+    });
+    linhas.push([]);
+    linhas.push(["SETOR","DEPARTAMENTO","PEDIDOS","LINHAS","QTD TOTAL","MATERIAIS DISTINTOS"]);
+    Data.porSetor(demandas).forEach(s => {
+      linhas.push([s.setor, s.departamento, s.pedidos, s.linhas, s.qtd, s.materiais]);
+    });
+    linhas.push([]);
+    linhas.push(["MATERIAL","CÓDIGO","GRUPO","QTD TOTAL","Nº PEDIDOS","SETORES","DEPARTAMENTOS"]);
+    Data.porMaterial(demandas).forEach(m => {
+      linhas.push([m.material, m.codigo, m.descGrupo, m.qtd, m.pedidos,
+        m.setores.join("; "), m.departamentos.join("; ")]);
+    });
+    linhas.push([]);
+    linhas.push(["DETALHAMENTO DOS PEDIDOS"]);
+    linhas.push(["ID","DATA/HORA","SEMESTRE","DEPARTAMENTO","SETOR","RESPONSÁVEL","CHEFIA","TELEFONE","EMAIL","MATRÍCULA","STATUS","ITENS","QTD TOTAL"]);
+    demandas.forEach(d => {
+      linhas.push([d.id, d.dataHora, d.semestre, d.departamento, d.setor,
+        d.responsavel, d.chefia, d.telefone, d.email, d.matricula,
+        d.status, d.itens.length, d.itens.reduce((s,i)=>s+i.qtd,0)]);
+    });
+    downloadCSV(linhas, `relatorio_${opts.tipo}_${Util.agoraISO()}.csv`);
+    Util.toast("CSV gerado com sucesso.", "ok");
+  }
+
+  function gerarXLS(demandas, opts) {
+    const k = Data.kpis(demandas);
+    const dep = Data.porDepartamento(demandas);
+    const set = Data.porSetor(demandas);
+    const mat = Data.porMaterial(demandas);
+
+    const html = `
+      <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel">
+      <head><meta charset="utf-8">
+      <style>
+        table{border-collapse:collapse;font-family:Arial,sans-serif;font-size:11px}
+        th{background:#0b3d6b;color:#fff;padding:6px 8px;border:1px solid #333;text-align:left}
+        td{padding:5px 8px;border:1px solid #ccc}
+        .title{font-size:16px;font-weight:bold;color:#0b3d6b}
+        .section{font-size:13px;font-weight:bold;color:#0b3d6b;background:#e8f1f9;padding:6px}
+        .num{text-align:right}
+      </style></head><body>
+      <table>
+        <tr><td colspan="8" class="title">Relatório de Demandas — CT/UFPB</td></tr>
+        <tr><td colspan="8">Tipo: ${opts.tipo} | Gerado em: ${Util.agora()}</td></tr>
+        <tr><td colspan="8">Filtros: ${filtrosDescricao(opts)}</td></tr>
+        <tr><td colspan="8"></td></tr>
+        <tr><td colspan="8" class="section">RESUMO EXECUTIVO</td></tr>
+        <tr><td>Pedidos</td><td class="num">${k.pedidos}</td><td>Linhas</td><td class="num">${k.linhasItens}</td><td>Qtd Total</td><td class="num">${k.qtdTotal}</td><td>Materiais</td><td class="num">${k.materiaisDistintos}</td></tr>
+        <tr><td colspan="8"></td></tr>
+        <tr><td colspan="8" class="section">DEMANDA POR DEPARTAMENTO</td></tr>
+        <tr><th>Departamento</th><th>Pedidos</th><th>Linhas</th><th>Qtd Total</th><th>Materiais Distintos</th><th></th><th></th><th></th></tr>
+        ${dep.map(d => `<tr><td>${Util.esc(d.departamento)}</td><td class="num">${d.pedidos}</td><td class="num">${d.linhas}</td><td class="num">${d.qtd}</td><td class="num">${d.materiais}</td><td></td><td></td><td></td></tr>`).join("")}
+        <tr><td colspan="8"></td></tr>
+        <tr><td colspan="8" class="section">DEMANDA POR SETOR</td></tr>
+        <tr><th>Departamento</th><th>Setor</th><th>Pedidos</th><th>Linhas</th><th>Qtd Total</th><th>Materiais</th><th></th><th></th></tr>
+        ${set.map(s => `<tr><td>${Util.esc(s.departamento)}</td><td>${Util.esc(s.setor)}</td><td class="num">${s.pedidos}</td><td class="num">${s.linhas}</td><td class="num">${s.qtd}</td><td class="num">${s.materiais}</td><td></td><td></td></tr>`).join("")}
+        <tr><td colspan="8"></td></tr>
+        <tr><td colspan="8" class="section">MATERIAIS CONSOLIDADOS</td></tr>
+        <tr><th>Código</th><th>Material</th><th>Grupo</th><th>Qtd Total</th><th>Nº Pedidos</th><th>Setores</th><th>Departamentos</th><th></th></tr>
+        ${mat.map(m => `<tr><td>${Util.esc(m.codigo)}</td><td>${Util.esc(m.material)}</td><td>${Util.esc(m.descGrupo)}</td><td class="num">${m.qtd}</td><td class="num">${m.pedidos}</td><td>${Util.esc(m.setores.join("; "))}</td><td>${Util.esc(m.departamentos.join("; "))}</td><td></td></tr>`).join("")}
+        <tr><td colspan="8"></td></tr>
+        <tr><td colspan="8" class="section">DETALHAMENTO DOS PEDIDOS</td></tr>
+        <tr><th>ID</th><th>Data/Hora</th><th>Semestre</th><th>Departamento</th><th>Setor</th><th>Itens</th><th>Qtd</th><th>Status</th></tr>
+        ${demandas.map(d => `<tr><td>${Util.esc(d.id)}</td><td>${Util.esc(d.dataHora)}</td><td>${Util.esc(d.semestre)}</td><td>${Util.esc(d.departamento)}</td><td>${Util.esc(d.setor)}</td><td class="num">${d.itens.length}</td><td class="num">${d.itens.reduce((s,i)=>s+i.qtd,0)}</td><td>${Util.esc(d.status)}</td></tr>`).join("")}
+      </table>
+      </body></html>`;
+
+    const blob = new Blob(["\uFEFF" + html], { type: "application/vnd.ms-excel;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `relatorio_${opts.tipo}_${Util.agoraISO()}.xls`;
+    a.click();
+    Util.toast("Arquivo Excel gerado.", "ok");
+  }
+
+  function populateSelects() {
+    const dep = document.getElementById("rep-dep");
+    if (dep && dep.options.length <= 1) {
+      API.getDepartamentos().forEach(d => {
+        const o = document.createElement("option"); o.value=d; o.textContent=d; dep.appendChild(o);
+      });
+    }
+    const sem = document.getElementById("rep-sem");
+    if (sem && sem.options.length <= 1) {
+      Util.semestresDisponiveis().forEach(s => {
+        const o = document.createElement("option"); o.value=s; o.textContent=s; sem.appendChild(o);
+      });
+    }
+    // Setores dinâmicos conforme departamento
+    const depSel = document.getElementById("rep-dep");
+    if (depSel) {
+      depSel.addEventListener("change", () => {
+        const s = document.getElementById("rep-setor");
+        s.innerHTML = '<option value="">Todos</option>';
+        const d = depSel.value;
+        const setores = [...new Set(State.demandas
+          .filter(x => !d || x.departamento === d)
+          .map(x => x.setor))].sort();
+        setores.forEach(x => {
+          const o = document.createElement("option"); o.value=x; o.textContent=x; s.appendChild(o);
+        });
+      });
+    }
+  }
+
+  return { gerar, populateSelects };
+})();
+
+/* ============================================================
+   CSV download helper
+   ============================================================ */
+function downloadCSV(linhas, filename) {
+  const csv = linhas.map(l => l.map(c => {
+    const s = String(c ?? "").replace(/"/g, '""');
+    return /[",;\n]/.test(s) ? `"${s}"` : s;
+  }).join(";")).join("\n");
+  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  Util.toast("Arquivo CSV gerado.", "ok");
+}
+
+/* ============================================================
+   DEMANDA (formulário — inalterado)
+   ============================================================ */
+const Demanda = (() => {
+
+  async function init() {
+    const selDep = document.getElementById("sel-departamento");
+    if (selDep.options.length <= 1) {
+      API.getDepartamentos().forEach(d => {
+        const o = document.createElement("option");
+        o.value = d; o.textContent = d;
+        selDep.appendChild(o);
+      });
+    }
+
+    const selSem = document.getElementById("sel-semestre");
+    if (selSem.options.length <= 1) {
+      Util.semestresDisponiveis().forEach(s => {
+        const o = document.createElement("option");
+        o.value = s; o.textContent = s;
+        selSem.appendChild(o);
+      });
+    }
+    const semAtual = Util.semestreAtual();
+    selSem.value = semAtual;
+    State.dados.semestre = semAtual;
+
+    const materiais = await API.carregarMateriais();
+    const selGrupo = document.getElementById("sel-grupo");
+    if (selGrupo.options.length <= 1) {
+      const grupos = [...new Map(materiais.map(m => [m.grupo, m])).values()]
+        .sort((a,b) => a.grupo.localeCompare(b.grupo));
+      grupos.forEach(g => {
+        const o = document.createElement("option");
+        o.value = g.grupo;
+        o.textContent = `${g.grupo} — ${g.descGrupo}`;
+        selGrupo.appendChild(o);
+      });
+    }
+
+    bindEventos();
+    if (API.getFonte() === "fallback") {
+      Util.toast("API indisponível — usando base local de materiais.", "erro");
+    }
+  }
+
+  function bindEventos() {
+    document.getElementById("sel-departamento").addEventListener("change", e => {
+      State.dados.departamento = e.target.value;
+    });
+
+    const inpSetor = document.getElementById("inp-setor-manual");
+    inpSetor.addEventListener("focus", () => {
+      Util.toast("ℹ️ Digite o nome do seu setor por extenso (ex.: Laboratório de Química Analítica).", "info");
+    });
+    inpSetor.addEventListener("input", e => { State.dados.setor = e.target.value; });
+
+    document.getElementById("sel-semestre").addEventListener("change", e => {
+      State.dados.semestre = e.target.value;
+    });
+
+    document.getElementById("chk-mesma-pessoa").addEventListener("change", e => {
+      if (e.target.checked) {
+        document.getElementById("inp-chefia").value = document.getElementById("inp-responsavel").value;
+      }
+    });
+    document.getElementById("inp-responsavel").addEventListener("input", e => {
+      if (document.getElementById("chk-mesma-pessoa").checked) {
+        document.getElementById("inp-chefia").value = e.target.value;
+      }
+    });
+
+    document.getElementById("inp-telefone").addEventListener("input", e => {
+      e.target.value = Util.mascaraTelefone(e.target.value);
+    });
+
+    document.getElementById("sel-grupo").addEventListener("change", async e => {
+      const g = e.target.value;
+      const cont = document.getElementById("lista-materiais");
+      if (!g) {
+        cont.innerHTML = '<div class="empty"><div class="ico">📋</div>Selecione um grupo acima para visualizar os materiais.</div>';
+        return;
+      }
+      const materiais = await API.carregarMateriais();
+      const lista = materiais.filter(m => m.grupo === g);
+      cont.innerHTML = "";
+      if (!lista.length) {
+        cont.innerHTML = '<div class="empty">Nenhum material neste grupo.</div>';
+        return;
+      }
+      lista.forEach(m => {
+        const div = document.createElement("div");
+        div.className = "material-row";
+        div.innerHTML = `
+          <div class="material-info">
+            <div class="nome" title="${Util.esc(m.material)}">${Util.esc(m.material)}</div>
+            <div class="meta">Código: <b>${Util.esc(m.codigo)}</b> · Saldo atual: <b>${Util.fmtNum(m.saldo)}</b></div>
+          </div>
+          <div class="material-add">
+            <input type="number" min="1" value="1" class="qtd-input" data-cod="${Util.esc(m.codigo)}" />
+            <button class="btn btn-primary btn-sm" data-add="${Util.esc(m.codigo)}">➕ Adicionar</button>
+          </div>`;
+        cont.appendChild(div);
+      });
+      cont.querySelectorAll("[data-add]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const cod = btn.getAttribute("data-add");
+          const mat = lista.find(x => x.codigo === cod);
+          const qtdInput = cont.querySelector(`.qtd-input[data-cod="${CSS.escape(cod)}"]`);
+          const qtd = Math.max(1, Number(qtdInput.value) || 1);
+          const r = State.addItem({ ...mat, qtd });
+          if (r.duplicado) { Util.toast("Este material já foi adicionado à sua demanda.", "erro"); return; }
+          Util.toast(`Adicionado: ${mat.material.slice(0,40)}...`, "ok");
+          renderCarrinho();
+        });
+      });
+    });
+  }
+
+  function renderCarrinho() {
+    const cont = document.getElementById("cart-items");
+    if (!State.carrinho.length) {
+      cont.innerHTML = '<div class="empty" style="padding:16px">Nenhum material adicionado ainda.</div>';
+    } else {
+      cont.innerHTML = "";
+      State.carrinho.forEach(it => {
+        const div = document.createElement("div");
+        div.className = "cart-item";
+        div.innerHTML = `
+          <div>
+            <div class="ci-nome">${Util.esc(it.material.length > 70 ? it.material.slice(0,70)+"..." : it.material)}</div>
+            <div class="ci-meta">Cód. ${Util.esc(it.codigo)} · ${Util.esc(it.descGrupo)}</div>
+          </div>
+          <input type="number" min="1" value="${it.qtd}" data-qtd="${Util.esc(it.codigo)}" />
+          <button class="btn-remove" data-rm="${Util.esc(it.codigo)}" title="Remover">🗑️</button>`;
+        cont.appendChild(div);
+      });
+      cont.querySelectorAll("[data-qtd]").forEach(inp => {
+        inp.addEventListener("change", e => {
+          State.updateQtd(inp.getAttribute("data-qtd"), e.target.value);
+          renderCarrinho();
+        });
+      });
+      cont.querySelectorAll("[data-rm]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          State.removeItem(btn.getAttribute("data-rm"));
+          renderCarrinho();
+        });
+      });
+    }
+    document.getElementById("cart-count").textContent = State.totalItens();
+    document.getElementById("cart-total").textContent = Util.fmtNum(State.totalUnidades());
+  }
+
+  function coletarDadosFormulario() {
+    State.dados.departamento = document.getElementById("sel-departamento").value;
+    State.dados.setor = document.getElementById("inp-setor-manual").value.trim();
+    State.dados.semestre = document.getElementById("sel-semestre").value;
+    State.dados.responsavel = document.getElementById("inp-responsavel").value.trim();
+    State.dados.chefia = document.getElementById("inp-chefia").value.trim();
+    State.dados.telefone = document.getElementById("inp-telefone").value.trim();
+    State.dados.email = document.getElementById("inp-email").value.trim();
+    State.dados.matricula = document.getElementById("inp-matricula").value.trim();
+    State.dados.observacao = document.getElementById("inp-observacao").value.trim();
+  }
+
+  function validarEtapa(n) {
+    coletarDadosFormulario();
+    const erros = [];
+    const d = State.dados;
+    if (n >= 1) {
+      if (!d.departamento) erros.push("Departamento é obrigatório.");
+      if (!d.setor) erros.push("Setor demandante é obrigatório (informe por extenso).");
+      if (!d.semestre) erros.push("Semestre da demanda é obrigatório.");
+    }
+    if (n >= 2) {
+      if (!d.responsavel) erros.push("Responsável administrativo/técnico é obrigatório.");
+      if (!d.chefia) erros.push("Chefia do setor é obrigatória.");
+    }
+    if (n >= 3) {
+      if (!d.telefone) erros.push("WhatsApp/Telefone é obrigatório.");
+      if (!d.email || !Util.validarEmail(d.email)) erros.push("E-mail válido é obrigatório.");
+      if (!d.matricula) erros.push("Matrícula do responsável é obrigatória.");
+    }
+    if (n >= 4) {
+      if (!State.carrinho.length) erros.push("Adicione pelo menos um material à demanda.");
+      State.carrinho.forEach(i => { if (i.qtd <= 0) erros.push(`Quantidade inválida para ${i.material.slice(0,30)}...`); });
+    }
+    return erros;
+  }
+
+  function renderRevisao() {
+    coletarDadosFormulario();
+    const d = State.dados;
+    document.getElementById("rev-dados").innerHTML = [
+      ["Departamento", d.departamento],
+      ["Setor", d.setor],
+      ["Semestre", d.semestre],
+      ["Responsável", d.responsavel],
+      ["Chefia", d.chefia],
+      ["Telefone", d.telefone],
+      ["E-mail", d.email],
+      ["Matrícula", d.matricula],
+      ["Observação", d.observacao || "—"]
+    ].map(([k,v]) => `<div class="revisao-item"><div class="k">${Util.esc(k)}</div><div class="v">${Util.esc(v)||"—"}</div></div>`).join("");
+
+    const tbody = document.querySelector("#rev-tabela tbody");
+    tbody.innerHTML = State.carrinho.map(i => `
+      <tr>
+        <td>${Util.esc(i.descGrupo)}</td>
+        <td>${Util.esc(i.material)}</td>
+        <td class="mono">${Util.esc(i.codigo)}</td>
+        <td class="num">${Util.fmtNum(i.saldo)}</td>
+        <td class="num"><b>${Util.fmtNum(i.qtd)}</b></td>
+      </tr>`).join("");
+  }
+
+  return { init, renderCarrinho, coletarDadosFormulario, validarEtapa, renderRevisao };
+})();
+
+/* ============================================================
+   ADMIN (mantido para compatibilidade)
+   ============================================================ */
+const Admin = (() => {
+  async function render() {
+    const demandas = State.demandas;
+    const todosItens = demandas.flatMap(d => d.itens);
+    const k = {
+      pedidos: demandas.length,
+      setores: new Set(demandas.map(d => d.setor)).size,
+      deps: new Set(demandas.map(d => d.departamento)).size,
+      materiais: new Set(todosItens.map(i => i.codigo)).size,
+      totalQtd: todosItens.reduce((s,i) => s + i.qtd, 0),
+      linhas: todosItens.length
+    };
+    document.getElementById("adm-kpis").innerHTML = [
+      ["Pedidos", k.pedidos, ""],
+      ["Setores", k.setores, ""],
+      ["Departamentos", k.deps, "de 8"],
+      ["Materiais distintos", k.materiais, ""],
+      ["Qtd total", Util.fmtNum(k.totalQtd), "unidades"],
+      ["Linhas", k.linhas, ""]
+    ].map(([l,v,s]) => `
+      <div class="kpi">
+        <div class="kpi-label">${Util.esc(l)}</div>
+        <div class="kpi-value">${v}</div>
+        ${s ? `<div class="kpi-sub">${Util.esc(s)}</div>` : ""}
+      </div>`).join("");
+
+    const tbody = document.querySelector("#adm-tabela-demandas tbody");
+    tbody.innerHTML = demandas.length ? demandas.map(d => {
+      const total = d.itens.reduce((s,i)=>s+i.qtd,0);
+      return `<tr>
+        <td class="mono"><b>${Util.esc(d.id)}</b></td>
+        <td>${Util.esc(d.dataHora)}</td>
+        <td>${Util.esc(d.semestre)}</td>
+        <td>${Util.esc(d.departamento)}</td>
+        <td>${Util.esc(d.setor)}</td>
+        <td class="num">${d.itens.length}</td>
+        <td class="num"><b>${Util.fmtNum(total)}</b></td>
+        <td><span class="badge">${Util.esc(d.status)}</span></td>
+      </tr>`;
+    }).join("") : '<tr><td colspan="8" class="empty">Nenhuma demanda.</td></tr>';
+  }
+
+  function exportarCSV() {
+    const linhas = [["ID","Data/Hora","Semestre","Departamento","Setor","Responsável","Itens","Qtd Total","Status"]];
+    State.demandas.forEach(d => {
+      linhas.push([d.id, d.dataHora, d.semestre, d.departamento, d.setor,
+        d.responsavel, d.itens.length, d.itens.reduce((s,i)=>s+i.qtd,0), d.status]);
+    });
+    downloadCSV(linhas, `admin_demandas_${Util.agoraISO()}.csv`);
+  }
+
+  async function diagnosticarAPI() {
+    const el = document.getElementById("adm-diag");
+    el.innerHTML = "⏳ Testando conexão com a API...";
+    try {
+      const url = API.ENDPOINT + (API.ENDPOINT.includes("?") ? "&" : "?") + "action=materiais";
+      const r = await fetch(url, { redirect:"follow" });
+      const text = await r.text();
+      let json; try { json = JSON.parse(text); } catch(e) {}
+      const qtd = json ? (Array.isArray(json) ? json.length : (json.materiais?.length || json.data?.length || 0)) : 0;
+      el.innerHTML = `✅ API respondeu. HTTP ${r.status}. Materiais retornados: ${qtd}.<br><small>Endpoint: ${API.ENDPOINT}</small>`;
+    } catch(e) {
+      el.innerHTML = `❌ Falha na API: ${Util.esc(e.message)}.<br>Usando fallback local com ${window.__MATERIAIS_FALLBACK__.length} materiais.`;
+    }
+  }
+
+  return { render, exportarCSV, diagnosticarAPI };
+})();
+
+/* ============================================================
+   APP
+   ============================================================ */
+const App = (() => {
+  const LOGIN_PADRAO = { user: "servidor ct", pass: "456789" };
+  const VIEWS_META = {
+    dashboard:      { title: "Dashboard",        sub: "Visão geral das demandas de aquisição" },
+    demanda:        { title: "Nova Demanda",     sub: "Registrar previsão semestral de materiais" },
+    pedidos:        { title: "Pedidos",          sub: "Consulta e acompanhamento dos pedidos" },
+    departamentos:  { title: "Departamentos",    sub: "Análise por departamento" },
+    setores:        { title: "Setores",          sub: "Análise por setor" },
+    consolidacao:   { title: "Consolidação",     sub: "Demanda consolidada por material" },
+    relatorios:     { title: "Relatórios",       sub: "Geração de PDF, CSV e Excel" },
+    admin:          { title: "Painel Admin",     sub: "Diagnóstico e exportação bruta" }
+  };
+
+  let _initialized = false;
+
+  function autenticar() {
+    const user = document.getElementById("login-user").value.trim().toLowerCase();
+    const pass = document.getElementById("login-pass").value;
+    const erro = document.getElementById("login-erro");
+    if (user === LOGIN_PADRAO.user && pass === LOGIN_PADRAO.pass) {
+      erro.style.display = "none";
+      sessionStorage.setItem("ct_logado", "1");
+      mostrarApp();
+      return true;
+    }
+    erro.style.display = "block";
+    return false;
+  }
+
+  async function mostrarApp() {
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("app-shell").classList.add("visible");
+    document.getElementById("app-header")?.style && (document.getElementById("app-header").style.display = "none");
+    await init();
+  }
+
+  function logout() {
+    sessionStorage.removeItem("ct_logado");
+    document.getElementById("login-screen").style.display = "grid";
+    document.getElementById("app-shell").classList.remove("visible");
+    document.getElementById("login-user").value = "";
+    document.getElementById("login-pass").value = "";
+    document.getElementById("login-erro").style.display = "none";
+  }
+
+  async function init() {
+    if (_initialized) return;
+    _initialized = true;
+
+    // popula selects
+    populateAllSelects();
+
+    // eventos sidebar
+    document.querySelectorAll(".sidebar-nav button").forEach(b => {
+      b.addEventListener("click", () => go(b.dataset.view));
+    });
+
+    // toggle sidebar
+    document.getElementById("btn-sidebar-toggle")?.addEventListener("click", toggleSidebarMobile);
+    document.getElementById("btn-collapse")?.addEventListener("click", toggleSidebarDesktop);
+    document.getElementById("sidebar-overlay")?.addEventListener("click", toggleSidebarMobile);
+
+    // botão collapse visível em desktop
+    if (window.innerWidth > 768) {
+      document.getElementById("btn-collapse").style.display = "grid";
+    }
+
+    // eventos de filtros
+    bindFilterEvents();
+
+    // eventos de demanda
+    await Demanda.init();
+    Demanda.renderCarrinho();
+
+    // tabela
+    PedidosTable.init();
+
+    // eventos de setores
+    document.getElementById("flt-setor-dep")?.addEventListener("change", Setores.render);
+    document.getElementById("flt-setor-sem")?.addEventListener("change", Setores.render);
+
+    // eventos de consolidação
+    document.getElementById("flt-cons-grupo")?.addEventListener("change", Consolidacao.render);
+    document.getElementById("flt-cons-busca")?.addEventListener("input", Util.debounce(Consolidacao.render, 250));
+
+    // relatórios
+    Relatorios.populateSelects();
+
+    // carrega demandas
+    await reloadData();
+
+    // aplica filtros a todas as views
+    Filters.onChange(() => {
+      renderAllViews();
+    });
+
+    // atualiza badge API
+    UI.atualizarBadgeAPI();
+  }
+
+  async function reloadData(force=false) {
+    try {
+      await Data.carregar(force);
+    } catch(e) {
+      console.warn("Falha ao carregar demandas:", e);
+      Util.toast("Não foi possível carregar os dados. Verifique a conexão e tente novamente.", "erro");
+    }
+    renderAllViews();
+  }
+
+  function renderAllViews() {
+    Dashboard.render();
+    PedidosTable.render();
+    Departamentos.render();
+    Setores.render();
+    Consolidacao.render();
+    Admin.render();
+  }
+
+  function populateAllSelects() {
+    // filtros pedidos
+    const selSem = document.getElementById("flt-semestre");
+    if (selSem && selSem.options.length <= 1) {
+      Util.semestresDisponiveis().forEach(s => {
+        const o = document.createElement("option"); o.value=s; o.textContent=s; selSem.appendChild(o);
+      });
+    }
+    const selDep = document.getElementById("flt-departamento");
+    if (selDep && selDep.options.length <= 1) {
+      API.getDepartamentos().forEach(d => {
+        const o = document.createElement("option"); o.value=d; o.textContent=d; selDep.appendChild(o);
+      });
+    }
+    const selStatus = document.getElementById("flt-status");
+    if (selStatus && selStatus.options.length <= 1) {
+      ["RECEBIDA","EM ANÁLISE","APROVADA","ATENDIDA","CANCELADA"].forEach(s => {
+        const o = document.createElement("option"); o.value=s; o.textContent=s; selStatus.appendChild(o);
+      });
+    }
+    Setores.populateSelects();
+    Consolidacao.populateGrupos();
+  }
+
+  function bindFilterEvents() {
+    const map = {
+      "flt-semestre": "semestre",
+      "flt-departamento": "departamento",
+      "flt-setor": "setor",
+      "flt-status": "status",
+      "flt-data-ini": "dataIni",
+      "flt-data-fim": "dataFim"
+    };
+    Object.entries(map).forEach(([id, key]) => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener("change", e => Filters.set({ [key]: e.target.value }));
+    });
+    const busca = document.getElementById("flt-busca");
+    if (busca) busca.addEventListener("input", Util.debounce(e => Filters.set({ busca: e.target.value }), 250));
+
+    // setores dinâmicos no filtro (conforme departamento)
+    const dep = document.getElementById("flt-departamento");
+    if (dep) {
+      dep.addEventListener("change", () => {
+        const sel = document.getElementById("flt-setor");
+        sel.innerHTML = '<option value="">Todos</option>';
+        const d = dep.value;
+        const setores = [...new Set(State.demandas
+          .filter(x => !d || x.departamento === d)
+          .map(x => x.setor))].sort();
+        setores.forEach(s => {
+          const o = document.createElement("option"); o.value=s; o.textContent=s; sel.appendChild(o);
+        });
+      });
+    }
+  }
+
+  function go(view) {
+    document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+    const el = document.getElementById("view-" + view);
+    if (el) el.classList.add("active");
+    document.querySelectorAll(".sidebar-nav button").forEach(b => {
+      b.classList.toggle("active", b.dataset.view === view);
+    });
+    const meta = VIEWS_META[view] || { title: view, sub: "" };
+    document.getElementById("crumb-title").textContent = meta.title;
+    document.getElementById("crumb-sub").textContent = meta.sub;
+
+    // Fecha sidebar mobile
+    if (window.innerWidth <= 768) {
+      document.getElementById("sidebar")?.classList.remove("mobile-open");
+      document.getElementById("sidebar-overlay")?.classList.remove("show");
+    }
+
+    // Renders específicos
+    if (view === "dashboard") Dashboard.render();
+    if (view === "pedidos") PedidosTable.render();
+    if (view === "departamentos") Departamentos.render();
+    if (view === "setores") Setores.render();
+    if (view === "consolidacao") Consolidacao.render();
+    if (view === "admin") Admin.render();
+
+    window.scrollTo({ top:0, behavior:"smooth" });
+  }
+
+  function setEtapa(n) {
+    State.etapaAtual = n;
+    document.querySelectorAll(".etapa").forEach(e => e.style.display = "none");
+    const alvo = document.getElementById("etapa-" + n);
+    if (alvo) alvo.style.display = "block";
+    document.querySelectorAll(".step").forEach(s => {
+      const sn = Number(s.dataset.step);
+      s.classList.toggle("active", sn === n);
+      s.classList.toggle("done", sn < n);
+    });
+    window.scrollTo({ top:0, behavior:"smooth" });
+  }
+
+  function avancar(proxima) {
+    if (State.etapaAtual === 2) Demanda.coletarDadosFormulario();
+    if (State.etapaAtual === 3) Demanda.coletarDadosFormulario();
+    const erros = Demanda.validarEtapa(proxima - 1);
+    if (erros.length) { Util.toast(erros[0], "erro"); return; }
+    if (proxima === 5) Demanda.renderRevisao();
+    setEtapa(proxima);
+  }
+
+  function voltar(anterior) { setEtapa(anterior); }
+
+  async function enviar() {
+    Demanda.coletarDadosFormulario();
+    const erros = Demanda.validarEtapa(5);
+    if (erros.length) { Util.toast(erros[0], "erro"); return; }
+
+    const d = State.dados;
+    let seq = 1;
+    try {
+      const store = JSON.parse(localStorage.getItem("ct_demandas_local") || "[]");
+      seq = store.length + 1;
+    } catch(e) { seq = 1; }
+    const id = Util.gerarIdDemanda(d.semestre, seq);
+
+    const payload = {
+      id_demanda: id,
+      data_hora_envio: Util.agora(),
+      semestre_demanda: d.semestre,
+      departamento: d.departamento,
+      setor_demandante: d.setor,
+      responsavel_administrativo_ou_tecnico: d.responsavel,
+      chefia_do_setor: d.chefia,
+      whatsapp_telefone: d.telefone,
+      email_setor_ou_responsavel: d.email,
+      matricula_responsavel: d.matricula,
+      observacao: d.observacao,
+      status: "RECEBIDA",
+      total_linhas_itens: State.carrinho.length,
+      total_quantidade_demandada: State.totalUnidades(),
+      itens: State.carrinho.map(i => ({
+        grupo: i.grupo,
+        descGrupo: i.descGrupo,
+        codigo: i.codigo,
+        material: i.material,
+        qtd: i.qtd,
+        saldoBase: i.saldo,
+        saldoApos: i.saldo - i.qtd
+      }))
+    };
+
+    const btn = document.querySelector("#etapa-5 .btn-success");
+    if (btn) { btn.disabled = true; btn.textContent = "Enviando..."; }
+    const r = await API.enviarDemanda(payload);
+    if (btn) { btn.disabled = false; btn.textContent = "✅ Confirmar e Enviar"; }
+
+    State.ultimaDemanda = payload;
+    document.getElementById("sucesso-id").textContent = id;
+    document.getElementById("sucesso-detalhes").innerHTML = `
+      <div class="revisao-grid">
+        <div class="revisao-item"><div class="k">Semestre</div><div class="v">${Util.esc(d.semestre)}</div></div>
+        <div class="revisao-item"><div class="k">Departamento</div><div class="v">${Util.esc(d.departamento)}</div></div>
+        <div class="revisao-item"><div class="k">Setor</div><div class="v">${Util.esc(d.setor)}</div></div>
+        <div class="revisao-item"><div class="k">Itens</div><div class="v">${State.totalItens()} materiais</div></div>
+        <div class="revisao-item"><div class="k">Total demandado</div><div class="v">${Util.fmtNum(State.totalUnidades())} unidades</div></div>
+      </div>
+      <div class="alert ${r.fonte === "local" ? "alert-warn" : "alert-ok"}" style="margin-top:14px">
+        <span>${r.fonte === "local" ? "⚠️" : "✅"}</span>
+        <div>${r.fonte === "local"
+          ? "A API não respondeu. A demanda foi registrada <b>localmente no navegador</b> e será reenviada automaticamente quando a conexão for restabelecida."
+          : "Demanda registrada no banco de dados do Centro de Tecnologia."}</div>
+      </div>`;
+    setEtapa(6);
+    Util.toast("Demanda registrada com sucesso!", "ok");
+
+    // força recarga de dados
+    API.invalidarCache();
+    reloadData(true);
+  }
+
+  function novoPedido() {
+    State.reset();
+    document.querySelectorAll("input,select,textarea").forEach(el => {
+      if (el.type === "checkbox") el.checked = false;
+      else if (el.id && el.id.startsWith("flt-")) return;
+      else if (el.id && el.id.startsWith("adm-")) return;
+      else if (el.id && el.id.startsWith("login-")) return;
+      else if (el.id && el.id.startsWith("rep-")) return;
+      else el.value = "";
+    });
+    document.getElementById("lista-materiais").innerHTML = '<div class="empty"><div class="ico">📋</div>Selecione um grupo acima para visualizar os materiais.</div>';
+    Demanda.renderCarrinho();
+    const semAtual = Util.semestreAtual();
+    document.getElementById("sel-semestre").value = semAtual;
+    State.dados.semestre = semAtual;
+    setEtapa(1);
+    go("demanda");
+  }
+
+  function imprimirComprovante() {
+    const d = State.ultimaDemanda;
+    if (!d) { Util.toast("Nenhuma demanda para imprimir.", "erro"); return; }
+    const w = window.open("", "_blank");
+    w.document.write(`
+      <html><head><meta charset="utf-8"><title>Comprovante ${Util.esc(d.id_demanda)}</title>
+      <style>
+        body{font-family:Arial,sans-serif;padding:30px;color:#0f172a;font-size:13px}
+        h1{color:#0b3d6b;font-size:18px;border-bottom:2px solid #0b3d6b;padding-bottom:6px;margin-bottom:4px}
+        .sub{color:#64748b;font-size:12px;margin-bottom:20px}
+        .id{font-family:monospace;font-size:16px;font-weight:bold;color:#0b3d6b;background:#e8f1f9;padding:8px 14px;border-radius:6px;display:inline-block;margin-bottom:16px}
+        table{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px}
+        th{background:#e8f1f9;color:#0b3d6b;text-align:left;padding:7px;border:1px solid #cbd5e1}
+        td{padding:6px 7px;border:1px solid #e2e8f0}
+        .num{text-align:right}
+        .bloco{margin-bottom:14px}
+        .bloco h3{font-size:12px;color:#0b3d6b;text-transform:uppercase;border-bottom:1px solid #cbd5e1;padding-bottom:3px;margin-bottom:6px}
+        .grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 20px}
+        .grid div{font-size:12px}
+        .k{color:#64748b;font-size:10px;text-transform:uppercase}
+        .v{font-weight:bold}
+        .rodape{margin-top:30px;font-size:11px;color:#64748b;text-align:center;border-top:1px solid #cbd5e1;padding-top:10px}
+      </style></head><body>
+      <h1>Comprovante de Demanda Semestral de Materiais</h1>
+      <div class="sub">Centro de Tecnologia — UFPB</div>
+      <div class="id">${Util.esc(d.id_demanda)}</div>
+      <div class="bloco"><h3>Dados da Solicitação</h3><div class="grid">
+        <div><div class="k">Data/Hora</div><div class="v">${Util.esc(d.data_hora_envio)}</div></div>
+        <div><div class="k">Semestre</div><div class="v">${Util.esc(d.semestre_demanda)}</div></div>
+        <div><div class="k">Departamento</div><div class="v">${Util.esc(d.departamento)}</div></div>
+        <div><div class="k">Setor</div><div class="v">${Util.esc(d.setor_demandante)}</div></div>
+        <div><div class="k">Responsável</div><div class="v">${Util.esc(d.responsavel_administrativo_ou_tecnico)}</div></div>
+        <div><div class="k">Chefia</div><div class="v">${Util.esc(d.chefia_do_setor)}</div></div>
+        <div><div class="k">Telefone</div><div class="v">${Util.esc(d.whatsapp_telefone)}</div></div>
+        <div><div class="k">E-mail</div><div class="v">${Util.esc(d.email_setor_ou_responsavel)}</div></div>
+        <div><div class="k">Matrícula</div><div class="v">${Util.esc(d.matricula_responsavel)}</div></div>
+        <div><div class="k">Status</div><div class="v">${Util.esc(d.status)}</div></div>
+      </div>
+      ${d.observacao ? `<div style="margin-top:8px"><div class="k">Observação</div><div>${Util.esc(d.observacao)}</div></div>` : ""}
+      </div>
+      <div class="bloco"><h3>Materiais Solicitados</h3>
+      <table><thead><tr><th>Código</th><th>Material</th><th>Grupo</th><th class="num">Saldo</th><th class="num">Qtd.</th></tr></thead>
+      <tbody>
+      ${d.itens.map(i => `<tr>
+        <td>${Util.esc(i.codigo)}</td>
+        <td>${Util.esc(i.material)}</td>
+        <td>${Util.esc(i.descGrupo)}</td>
+        <td class="num">${Util.fmtNum(i.saldoBase)}</td>
+        <td class="num"><b>${Util.fmtNum(i.qtd)}</b></td>
+      </tr>`).join("")}
+      </tbody>
+      <tfoot><tr style="background:#e8f1f9;font-weight:bold">
+        <td colspan="4" class="num">TOTAL</td>
+        <td class="num">${Util.fmtNum(d.total_quantidade_demandada)}</td>
+      </tr></tfoot>
+      </table></div>
+      <div class="rodape">
+        Documento gerado automaticamente pelo Sistema de Gestão de Demandas — CT/UFPB.<br>
+        Esta demanda é uma <b>previsão semestral</b> e não representa baixa imediata de estoque.
+      </div>
+      </body></html>`);
+    w.document.close();
+    setTimeout(() => w.print(), 400);
+  }
+
+  function toggleSidebarMobile() {
+    document.getElementById("sidebar").classList.toggle("mobile-open");
+    document.getElementById("sidebar-overlay").classList.toggle("show");
+  }
+  function toggleSidebarDesktop() {
+    const isCollapsed = document.body.classList.toggle("sidebar-collapsed");
+    document.getElementById("sidebar").classList.toggle("collapsed", isCollapsed);
+    document.getElementById("btn-collapse").textContent = isCollapsed ? "≡" : "≡";
+  }
+
+  document.addEventListener("keydown", e => {
+    if (e.key === "Enter" && document.getElementById("login-screen").style.display !== "none") {
+      autenticar();
+    }
+  });
+  document.getElementById("btn-login").addEventListener("click", autenticar);
+
+  // re-render charts ao redimensionar (SVG é responsivo, mas redesenha com debounce)
+  window.addEventListener("resize", Util.debounce(() => {
+    if (document.getElementById("view-dashboard").classList.contains("active")) Dashboard.render();
+    if (document.getElementById("view-departamentos").classList.contains("active")) Departamentos.render();
+    if (document.getElementById("view-setores").classList.contains("active")) Setores.render();
+  }, 250));
+
+  return { init, go, avancar, voltar, enviar, novoPedido, imprimirComprovante,
+           logout, autenticar, mostrarApp, reloadData };
+})();
+
+/* ============================================================
+   BOOTSTRAP
+   ============================================================ */
+document.addEventListener("DOMContentLoaded", () => {
+  if (sessionStorage.getItem("ct_logado") === "1") {
+    App.mostrarApp();
+  }
+});
+</script>
+</body>
+</html>
